@@ -19,6 +19,8 @@ options {
 	String floatType = "float";
 	String charType = "char";
 	String boolType = "bool";
+	
+	boolean currentlyExecuting = true;
 }
 
 
@@ -52,13 +54,15 @@ statement
 print
   : ^(Print value=expr arg=expr?)
   {
-  	if ($arg.text != null) {
-  		int argument = $arg.result.intResult;
-  		$value.result.print(argument);  	
-  	}
-  	else {
-  		$value.result.print(0);
-  	}
+  	if (currentlyExecuting) {
+	  	if ($arg.text != null) {
+	  		int argument = $arg.result.intResult;
+	  		$value.result.print(argument);  	
+	  	}
+	  	else {
+	  		$value.result.print(0);
+	  	}
+	  }
   }
   ;
   
@@ -109,8 +113,52 @@ assignment
   ;
   
 ifstatement
-  : ^(If expr slist ^(Else slist))
-  | ^(If expr slist)
+@init {
+	boolean haltedExecution = false;
+}
+@after {
+	// If we stopped execution due to failing condition, continue executing after leaving this 'if' block
+	if (haltedExecution) {
+		currentlyExecuting = true;
+	}
+}
+  : ^(If expr 
+  {
+  	// If we are currently executing code, and we fail the conditional,
+  	// then signify that we've stopped executing this block of code
+  	if (currentlyExecuting && 
+  			(($expr.result.boolResult != null && !$expr.result.boolResult) ||
+  			 ($expr.result.intResult != null && $expr.result.intResult == 0) ||
+  			 ($expr.result.floatResult != null && $expr.result.floatResult == 0))) {
+  		currentlyExecuting = false;
+  		haltedExecution = true;
+  	}
+  }
+  slist ^(Else
+  {
+  	if (haltedExecution) {
+  		currentlyExecuting = true;
+  	}
+  	else {
+  		currentlyExecuting = false;
+  		haltedExecution = true;
+  	}
+  }
+  slist))
+  | ^(If expr
+  {
+  	// If we are currently executing code, and we fail the conditional,
+  	// then signify that we've stopped executing this block of code
+  	if (currentlyExecuting && 
+  			(($expr.result.boolResult != null && !$expr.result.boolResult) ||
+  			 ($expr.result.intResult != null && $expr.result.intResult == 0) ||
+  			 ($expr.result.floatResult != null && $expr.result.floatResult == 0))) {
+  		currentlyExecuting = false;
+  		haltedExecution = true;
+  	}
+  }
+  slist)
+  
   ;
   
 loopstatement
@@ -195,18 +243,5 @@ expr returns [String exprType, Result result, String scalarType]
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR Identifier a=expr b=expr)
   | ^(GENERATOR ^(ROW Identifier a=expr) ^(COLUMN Identifier b=expr) c=expr)  
-  | ^(INDEX vector=expr indx=expr)
-  ;
-  
-vectorconst
-  : expr+
-  ;
-
-filter
-  : ^(Filter Identifier expr expr+)        
-  ;
-  
-generator
-  : ^(GENERATOR Identifier expr expr)
-  | ^(GENERATOR ^(ROW Identifier expr) ^(COLUMN Identifier expr) expr)    
+  | ^(INDEX vector=expr index=expr)
   ;
