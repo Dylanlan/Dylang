@@ -49,7 +49,16 @@ statement
   ;
 
 print
-  : ^(Print expr) {$expr.result.print();}
+  : ^(Print value=expr arg=expr?)
+  {
+  	if ($arg.text != null) {
+  		int argument = $arg.result.intResult;
+  		$value.result.print(argument);  	
+  	}
+  	else {
+  		$value.result.print(0);
+  	}
+  }
   ;
   
 length
@@ -143,7 +152,11 @@ specifier
   | Var
   ;
 
-expr returns [String exprType, Result result]
+//TODO: add a Type class, and set the return type to $result.type, calculated in the Operations class
+expr returns [String exprType, Result result, String scalarType]
+@init {
+	List<Result> vecResult = new ArrayList<Result>();
+}
   : ^(Plus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.add($a.result, $b.result);}
   | ^(Minus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.subtract($a.result, $b.result);}
   | ^(Multiply a=expr b=expr) {$exprType = $a.exprType; $result = Operations.multiply($a.result, $b.result);}
@@ -176,7 +189,7 @@ expr returns [String exprType, Result result]
   | ^(POS e=expr)
   | length
   | reverse
-  | ^(VCONST expr+)
+  | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Result(vecResult);}
   | ^(Range a=expr b=expr)
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR Identifier a=expr b=expr)

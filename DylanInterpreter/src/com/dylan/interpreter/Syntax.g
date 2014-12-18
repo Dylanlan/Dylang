@@ -69,8 +69,8 @@ length
 	;
 	
 print
-	: Print LParen expr RParen SemiColon -> ^(Print expr)
-	| Print expr SemiColon -> ^(Print expr)
+	: Print LParen value=expr (Comma arg=expr)? RParen SemiColon -> ^(Print $value $arg?)
+	| Print value=expr (Comma arg=expr)? SemiColon -> ^(Print $value $arg?)
 	;
 	
 reverse
@@ -250,7 +250,6 @@ atom
           toVConst.addChild((CommonTree) adaptor.create(Char, tokens[i]));
        }
     }
-    toVConst.addChild((CommonTree) adaptor.create(Char, "\\0"));
   }
   -> ^(VCONST {toVConst})
   | Identifier Dot^ (Identifier|Number)
@@ -386,7 +385,9 @@ fragment SingleChar
   :  ('A'..'Z'|'a'..'z'|'0'..'9'|' '|'!'|'#'|'$'|'%'|'&'|'('|')'|
           '*'|'+'|','|'-'|'.'|'/'|':'|';'|'<'|'='|'>'|'?'|'@'|'['|']'|
           '^'|'_'|'`'|'{'|'|'|'}'|'~'|
-          '\\' ('a'|'b'|'n'|'r'|'t'|'\\'|'\''|'\"'|'0'))
+          '\\'  ('A'..'Z'|'a'..'z'|'0'..'9'|' '|'!'|'#'|'$'|'%'|'&'|'('|')'|
+          '*'|'+'|','|'-'|'.'|'/'|':'|';'|'<'|'='|'>'|'?'|'@'|'['|']'|
+          '^'|'_'|'`'|'{'|'|'|'}'|'~'))
   ;
 
 Char
