@@ -17,6 +17,7 @@ options {
 {
 	String intType = "int";
 	String charType = "char";
+	String boolType = "bool";
 }
 
 
@@ -144,20 +145,20 @@ specifier
 
 expr returns [String exprType, Result result]
   : ^(Plus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.add($a.result, $b.result);}
-  | ^(Minus expr expr) {$exprType = $a.exprType; $result = Operations.subtract($a.result, $b.result);}
-  | ^(Multiply expr expr) {$exprType = $a.exprType; $result = Operations.multiply($a.result, $b.result);}
-  | ^(Divide expr expr) {$exprType = $a.exprType; $result = Operations.divide($a.result, $b.result);}
-  | ^(Mod expr expr)
-  | ^(Exponent expr expr)
-  | ^(Equals expr expr)
-  | ^(NEquals expr expr)
-  | ^(GThan expr expr)
-  | ^(LThan expr expr)
-  | ^(GThanE expr expr)
-  | ^(LThanE expr expr)
-  | ^(Or expr expr)
-  | ^(Xor expr expr)
-  | ^(And expr expr)
+  | ^(Minus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.subtract($a.result, $b.result);}
+  | ^(Multiply a=expr b=expr) {$exprType = $a.exprType; $result = Operations.multiply($a.result, $b.result);}
+  | ^(Divide a=expr b=expr) {$exprType = $a.exprType; $result = Operations.divide($a.result, $b.result);}
+  | ^(Mod a=expr b=expr) {$exprType = $a.exprType; $result = Operations.mod($a.result, $b.result);}
+  | ^(Exponent a=expr b=expr) {$exprType = $a.exprType; $result = Operations.exponent($a.result, $b.result);}
+  | ^(Equals a=expr b=expr) {$exprType = boolType; $result = Operations.equals($a.result, $b.result);}
+  | ^(NEquals a=expr b=expr) {$exprType = boolType; $result = Operations.notEquals($a.result, $b.result);}
+  | ^(GThan a=expr b=expr) {$exprType = boolType; $result = Operations.greaterThan($a.result, $b.result);}
+  | ^(LThan a=expr b=expr) {$exprType = boolType; $result = Operations.lessThan($a.result, $b.result);}
+  | ^(GThanE a=expr b=expr) {$exprType = boolType; $result = Operations.greaterThanEqual($a.result, $b.result);}
+  | ^(LThanE a=expr b=expr) {$exprType = boolType; $result = Operations.lessThanEqual($a.result, $b.result);}
+  | ^(Or a=expr b=expr) {$exprType = $a.exprType; $result = Operations.or($a.result, $b.result);}
+  | ^(Xor a=expr b=expr) {$exprType = $a.exprType; $result = Operations.xor($a.result, $b.result);}
+  | ^(And a=expr b=expr) {$exprType = $a.exprType; $result = Operations.and($a.result, $b.result);}
   | ^(Not expr)
   | ^(By expr expr)
   | ^(CALL Identifier ^(ARGLIST expr*))
@@ -165,8 +166,8 @@ expr returns [String exprType, Result result]
   | Identifier
   | Number {$exprType = intType; $result = new Result(new Integer($Number.text));}
   | FPNumber
-  | True
-  | False
+  | True {$exprType = boolType; $result = new Result(new Boolean(true));}
+  | False {$exprType = boolType; $result = new Result(new Boolean(false));}
   | Null
   | Char {$exprType = charType; $result = new Result(new Character(Operations.getCharacter($Char.text)));}
   | ^(TUPLEEX expr)

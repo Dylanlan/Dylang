@@ -34,7 +34,7 @@ public class Tester {
 			System.exit(1);
 		}
 
-		try {
+		//try {
         		//SymbolTable symtab = new SymbolTable();
         		SyntaxLexer lexer = new SyntaxLexer(input);
         		TokenStream tokenStream = new CommonTokenStream(lexer);
@@ -56,12 +56,12 @@ public class Tester {
         		nodes.setTokenStream(tokenStream);
         		Interpreter interpret = new Interpreter(nodes);
         		interpret.program();
-		}
-		catch (RuntimeException e) {
-		    System.out.println("A problem has occured with the dash input file: " + e.getMessage());
-                    System.out.println("Please check the input file for correctness.");
-                    System.exit(1);		    
-		}
+		//}
+		//catch (RuntimeException e) {
+		//    System.out.println("A problem has occured with the dash input file: " + e.getMessage());
+        //            System.out.println("Please check the input file for correctness.");
+        //            System.exit(1);		    
+		//}
 	}
 	
 }
