@@ -66,8 +66,8 @@ print
   }
   ;
   
-length
-	: ^(Length expr)
+length returns [String scalarType, Result result]
+	: ^(Length expr) {$scalarType = $expr.scalarType; $result = $expr.result;}
 	;
 	
 reverse
@@ -136,9 +136,11 @@ ifstatement
   }
   slist ^(Else
   {
+  	// If the 'if' statement failed, this 'else' should execute
   	if (haltedExecution) {
   		currentlyExecuting = true;
   	}
+  	// Otherwise, the 'if' statement executed, so this 'else' should not
   	else {
   		currentlyExecuting = false;
   		haltedExecution = true;
@@ -236,7 +238,7 @@ expr returns [String exprType, Result result, String scalarType]
   | ^(Dot Identifier)
   | ^(NEG a=expr) {$exprType = $a.exprType; $result = Operations.negative($a.result);}
   | ^(POS a=expr) {$exprType = $a.exprType; $result = $a.result;}
-  | length
+  | length {$exprType = intType; $result = new Result(new Integer($length.result.vectorResult.size()));}
   | reverse
   | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Result(vecResult);}
   | ^(Range a=expr b=expr)
