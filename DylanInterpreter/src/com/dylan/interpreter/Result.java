@@ -36,8 +36,9 @@ public class Result {
 		boolResult = boolValue;
 	}
 	
-	public Result(List<Result> vector) {
+	public Result(List<Result> vector, String type) {
 		vectorResult = vector;
+		vectorType = type;
 	}
 	
 	public int getInt() {

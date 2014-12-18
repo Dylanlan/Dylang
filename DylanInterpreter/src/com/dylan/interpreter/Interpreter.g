@@ -240,7 +240,7 @@ expr returns [String exprType, Result result, String scalarType]
   | ^(POS a=expr) {$exprType = $a.exprType; $result = $a.result;}
   | length {$exprType = intType; $result = new Result(new Integer($length.result.vectorResult.size()));}
   | reverse
-  | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Result(vecResult);}
+  | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Result(vecResult, $scalarType);}
   | ^(Range a=expr b=expr)
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR Identifier a=expr b=expr)

@@ -1,5 +1,8 @@
 package com.dylan.interpreter;
 
+import java.util.List;
+import java.util.ArrayList;
+
 //TODO: figure out and finish all type operations, note: can handle adding characters and strings to concatenate??!!
 public class Operations {
 
@@ -62,6 +65,20 @@ public class Operations {
 		}
 		else if (a.floatResult != null && b.floatResult != null) {
 			result.floatResult = a.floatResult + b.floatResult;
+		}
+		
+		else if (a.vectorType != null && b.vectorType != null) {
+			if (a.vectorType.equals("char") && b.vectorType.equals("char")) {
+				result.vectorType = "char";
+				List<Result> concat = new ArrayList<Result>();
+				concat.addAll(a.vectorResult);
+				concat.addAll(b.vectorResult);
+				result.vectorResult = concat;
+				result.vectorType = a.vectorType;
+			}
+			else {
+				System.out.println("Addition not implemented for these vector types");
+			}
 		}
 		else {
 			System.out.println("Addition not implemented for these types");
