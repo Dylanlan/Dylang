@@ -69,11 +69,27 @@ public class Operations {
 		
 		else if (a.vectorType != null && b.vectorType != null) {
 			if (a.vectorType.equals("char") && b.vectorType.equals("char")) {
-				result.vectorType = "char";
 				List<Result> concat = new ArrayList<Result>();
 				concat.addAll(a.vectorResult);
 				concat.addAll(b.vectorResult);
 				result.vectorResult = concat;
+				result.vectorType = a.vectorType;
+			}
+			else if (a.vectorType.equals("int") && b.vectorType.equals("int")) {
+				List<Result> resultVector = new ArrayList<Result>();
+				int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
+				for (int i = 0; i < maxSize; i++) {
+					int ai = 0;
+					if (i < a.vectorResult.size()) {
+						ai = a.vectorResult.get(i).intResult;
+					}
+					int bi = 0;
+					if (i < b.vectorResult.size()) {
+						bi = b.vectorResult.get(i).intResult;
+					}
+					resultVector.add(new Result(new Integer(ai + bi)));
+				}
+				result.vectorResult = resultVector;
 				result.vectorType = a.vectorType;
 			}
 			else {
