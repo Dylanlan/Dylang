@@ -16,6 +16,7 @@ options {
 @members
 {
 	String intType = "int";
+	String floatType = "float";
 	String charType = "char";
 	String boolType = "bool";
 }
@@ -172,21 +173,21 @@ expr returns [String exprType, Result result, String scalarType]
   | ^(Or a=expr b=expr) {$exprType = $a.exprType; $result = Operations.or($a.result, $b.result);}
   | ^(Xor a=expr b=expr) {$exprType = $a.exprType; $result = Operations.xor($a.result, $b.result);}
   | ^(And a=expr b=expr) {$exprType = $a.exprType; $result = Operations.and($a.result, $b.result);}
-  | ^(Not expr)
+  | ^(Not a=expr) {$exprType = boolType; $result = Operations.not($a.result);}
   | ^(By expr expr)
   | ^(CALL Identifier ^(ARGLIST expr*))
   | ^(As t=type e=expr)
   | Identifier
   | Number {$exprType = intType; $result = new Result(new Integer($Number.text));}
-  | FPNumber
+  | FPNumber {$exprType = floatType; $result = new Result(new Float($FPNumber.text));}
   | True {$exprType = boolType; $result = new Result(new Boolean(true));}
   | False {$exprType = boolType; $result = new Result(new Boolean(false));}
   | Null
   | Char {$exprType = charType; $result = new Result(new Character(Operations.getCharacter($Char.text)));}
   | ^(TUPLEEX expr)
   | ^(Dot Identifier)
-  | ^(NEG e=expr)
-  | ^(POS e=expr)
+  | ^(NEG a=expr) {$exprType = $a.exprType; $result = Operations.negative($a.result);}
+  | ^(POS a=expr) {$exprType = $a.exprType; $result = $a.result;}
   | length
   | reverse
   | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Result(vecResult);}

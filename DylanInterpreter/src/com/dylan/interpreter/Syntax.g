@@ -147,7 +147,7 @@ nonScalar
 scalar
 	: Boolean
   | Integer
-  | Real
+  | Float
   | Character
   ;
   
@@ -292,7 +292,7 @@ Integer   : 'integer';
 Boolean   : 'boolean';
 True      : 'true';
 False     : 'false';
-Real      : 'real';
+Float      : 'float';
 String    : 'string';
 Procedure : 'procedure';
 Function  : 'function';
