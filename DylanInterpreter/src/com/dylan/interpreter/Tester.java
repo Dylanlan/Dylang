@@ -47,10 +47,7 @@ public class Tester {
         			
         		CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
         		nodes.setTokenStream(tokenStream);
-        		
-        			
-        		st = gen.toDOT(ast);
-        		//System.out.println(st);
+
         		
         		nodes = new CommonTreeNodeStream(ast);
         		nodes.setTokenStream(tokenStream);

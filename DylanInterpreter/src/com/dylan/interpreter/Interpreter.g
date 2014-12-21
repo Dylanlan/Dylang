@@ -283,22 +283,22 @@ slist
   ;
 
 type returns [TypeSymbol type]
-  : ^(nonScalar scalar) {$type = new NonScalarTypeSymbol($nonScalar.name, new ScalarTypeSymbol($scalar.name));}
-  | scalar {$type = new ScalarTypeSymbol($scalar.name);}
+  : nonScalar {$type = $nonScalar.type;}
+  | scalar {$type = $scalar.type;}
   | tuple {System.out.println("Tuples not finished.");}
   | Identifier {System.out.println("Is this a typedef?");}
   ;
 
-nonScalar returns [String name]
-  : ^(Vector Number?) {$name = "vector";}
-  | ^(Matrix Number? Number?) {$name = "matrix";}
-  ;  
+nonScalar returns [TypeSymbol type]
+  : ^(Vector scalar Number?) {$type = new NonScalarTypeSymbol("vector", $scalar.type);}
+  | ^(Matrix scalar Number? Number?) {$type = new NonScalarTypeSymbol("matrix", $scalar.type);}
+  ;
 
-scalar returns [String name]
-	: Boolean {$name = "boolean";}
-  | Integer {$name = "integer";}
-  | Float {$name = "float";}
-  | Character {$name = "character";}
+scalar returns [TypeSymbol type]
+	: Boolean {$type = new ScalarTypeSymbol("boolean");}
+  | Integer {$type = new ScalarTypeSymbol("integer");}
+  | Float {$type = new ScalarTypeSymbol("float");}
+  | Character {$type = new ScalarTypeSymbol("character");}
   ;
   
 tuple
