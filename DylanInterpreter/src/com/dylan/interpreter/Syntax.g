@@ -46,7 +46,7 @@ mainblock
   ;
   
 globalStatement
-  : declaration
+  : statement
   | typedef
   | function
   ;

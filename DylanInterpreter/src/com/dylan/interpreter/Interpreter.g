@@ -21,11 +21,20 @@ options {
 	String boolType = "bool";
 	
 	boolean currentlyExecuting = true;
+	
+	// Need to get this information in an earlier tree grammar, then pass it here
+	boolean hasMain = true;
 }
 
 
 program
-  : ^(PROGRAM mainblock)
+  : ^(PROGRAM 
+  {
+  	if (hasMain) {
+  		currentlyExecuting = false;
+  	}
+  }
+  mainblock)
   ;
   
 mainblock
@@ -33,7 +42,7 @@ mainblock
   ;
   
 globalStatement
-  : declaration
+  : statement
   | typedef
   | function
   ;
@@ -88,7 +97,25 @@ block
   ;
   
 function
-  : ^(Function Identifier paramlist ^(Returns type?) block?)
+  : ^(Function Identifier paramlist ^(Returns type?)
+  {
+	  if (hasMain && $Identifier.text.equals("main") && !currentlyExecuting) {
+	  	currentlyExecuting = true;
+	  }
+	  else {
+	  	currentlyExecuting = false;
+	  }
+	}
+  
+  block?)
+  {
+  	if (hasMain) {
+  		currentlyExecuting = false;
+  	}
+  	else {
+  		currentlyExecuting = true;
+  	}
+  }
   ;
   
 paramlist
