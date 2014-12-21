@@ -1,13 +1,13 @@
-package com.dylan.interpreter;
+package com.dylan.symbolTable;
 
 import java.util.List;
 
-public class Result {
+public class Value {
 	public Integer intResult;
 	public Float floatResult;
 	public Character charResult;
 	public Boolean boolResult;
-	public List<Result> vectorResult;
+	public List<Value> vectorResult;
 	public String vectorType;
 	public Object matrixResult;
 	public String matrixType;
@@ -16,27 +16,27 @@ public class Result {
 	public static int VEC_COMMAS = 2;
 	public static int VEC_BRACKETS_COMMAS = 3;
 	
-	public Result() {
+	public Value() {
 		
 	}
 	
-	public Result(Integer intValue) {
+	public Value(Integer intValue) {
 		intResult = intValue;
 	}
 	
-	public Result(Float floatValue) {
+	public Value(Float floatValue) {
 		floatResult = floatValue;
 	}
 	
-	public Result(Character charValue) {
+	public Value(Character charValue) {
 		charResult = charValue;
 	}
 	
-	public Result(Boolean boolValue) {
+	public Value(Boolean boolValue) {
 		boolResult = boolValue;
 	}
 	
-	public Result(List<Result> vector, String type) {
+	public Value(List<Value> vector, String type) {
 		vectorResult = vector;
 		vectorType = type;
 	}
@@ -108,7 +108,7 @@ public class Result {
 			}
 			int size = vectorResult.size();
 			for(int i = 0; i < size; i++) {
-				Result element = vectorResult.get(i);
+				Value element = vectorResult.get(i);
 				element.print(argument);
 				if (element.charResult == null && i < size - 1) {
 					if (argument == VEC_COMMAS || argument == VEC_BRACKETS_COMMAS) {

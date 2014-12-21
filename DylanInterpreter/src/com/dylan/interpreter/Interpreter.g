@@ -3,6 +3,7 @@ tree grammar Interpreter;
 options {
   language = Java;
   tokenVocab = Syntax;
+  output = AST;
   ASTLabelType = CommonTree;
   backtrack = true;
   memoize = true;
@@ -11,19 +12,30 @@ options {
 @header
 {
   package com.dylan.interpreter;
+  import com.dylan.symbolTable.*;
 }
 
 @members
 {
+	SymbolTable symTab = new SymbolTable();
+	Scope currentScope;
 	String intType = "int";
 	String floatType = "float";
 	String charType = "char";
 	String boolType = "bool";
+	int scopeCounter = 0;
+  int numLoop = 0;
+  int scopeNumber = 0;
 	
 	boolean currentlyExecuting = true;
 	
 	// Need to get this information in an earlier tree grammar, then pass it here
 	boolean hasMain = true;
+	
+	private int getCurrentScopeNum() {
+  	return currentScope.scopeNum;
+  }
+	
 }
 
 
@@ -43,7 +55,6 @@ mainblock
   
 globalStatement
   : statement
-  | typedef
   | function
   ;
   
@@ -75,29 +86,64 @@ print
   }
   ;
   
-length returns [String scalarType, Result result]
+length returns [String scalarType, Value result]
 	: ^(Length expr) {$scalarType = $expr.scalarType; $result = $expr.result;}
 	;
 	
-reverse
-	: ^(Reverse expr)
+reverse returns [String scalarType, Value result]
+	: ^(Reverse expr) {$scalarType = $expr.scalarType; $result = $expr.result;}
 	;
 
 declaration
-	: ^(DECL specifier? type Identifier)
-	| ^(DECL specifier? type ^(Assign Identifier expr))
-	;
+@init {
+	VariableSymbol vs = null;
+	int currentScopeNum = getCurrentScopeNum();
+	Value result = null;
+}
+@after {
+	Symbol spec;
+	if ($s.text == null) {
+  	spec = new Symbol("var");
+  }
+  else {
+  	spec = new Symbol($s.text);
+  }
   
-typedef
-  : ^(Typedef type Identifier)
-  ;
+  vs = new VariableSymbol($id.text, $t.type, spec);
+  vs.scopeNum = currentScopeNum;
+  
+  if (result != null) {
+  	vs.setValue(result);
+  }
+  
+  currentScope.define(vs);
+}
+	: ^(DECL s=specifier? t=type id=Identifier)
+	| ^(DECL s=specifier? t=type ^(Assign id=Identifier expr {result = $expr.result;}))
+	;
 
 block
   : ^(BLOCK statement*)
   ;
   
 function
-  : ^(Function Identifier paramlist ^(Returns type?)
+@init {
+	TypeSymbol type = null;
+}
+@after {
+	
+	if ($t.text != null) {
+		type = $t.type;
+	}
+	else {
+		type = new ScalarTypeSymbol("null");
+	}
+	
+	FunctionSymbol fs = new FunctionSymbol($id.text, type);
+	symTab.defineFunction(fs);
+	currentScope = currentScope.getEnclosingScope();
+}
+  : ^(Function id=Identifier paramlist ^(Returns t=type?)
   {
 	  if (hasMain && $Identifier.text.equals("main") && !currentlyExecuting) {
 	  	currentlyExecuting = true;
@@ -106,8 +152,7 @@ function
 	  	currentlyExecuting = false;
 	  }
 	}
-  
-  block?)
+  block)
   {
   	if (hasMain) {
   		currentlyExecuting = false;
@@ -119,11 +164,33 @@ function
   ;
   
 paramlist
-  : ^(PARAMLIST parameter*)
+@after {
+	scopeNumber++;
+}
+  : ^(PARAMLIST {	currentScope = new Scope("paramscope", currentScope, scopeNumber);} p+=parameter*)
   ;
   
 parameter
-  : ^(Identifier specifier? type)
+@init {
+	VariableSymbol vs = null;
+	int currentScopeNum = getCurrentScopeNum();
+	String paramType = null;
+}
+@after {
+	Symbol spec;
+	if ($s.text == null) {
+  	spec = new Symbol("const");
+  }
+  else {
+  	spec = new Symbol($s.text);
+  }
+  
+  vs = new VariableSymbol($id.text, $t.type, spec);
+  vs.scopeNum = currentScopeNum;
+  
+  currentScope.define(vs);
+}
+  : ^(id=Identifier s=specifier? t=type)
   ;
   
 callStatement
@@ -135,8 +202,21 @@ returnStatement
   ;
   
 assignment
+@init {
+	VariableSymbol vs = null;
+	TypeSymbol variableType = null;
+	TypeSymbol scalarType = null;
+}
   : ^(Assign Identifier value=expr)
+  {
+  	vs = (VariableSymbol) currentScope.resolve($Identifier.text);
+  	vs.setValue($value.result);
+  }
   | ^(Assign ^(INDEX Identifier index=expr) value=expr)
+  {
+  	vs = (VariableSymbol) currentScope.resolve($Identifier.text);
+  	vs.setIndexedValue($value.result, $index.result);
+  }
   ;
   
 ifstatement
@@ -202,23 +282,23 @@ slist
   | declaration
   ;
 
-type
-  : ^(nonScalar scalar)
-  | scalar
-  | tuple
-  | Identifier
+type returns [TypeSymbol type]
+  : ^(nonScalar scalar) {$type = new NonScalarTypeSymbol($nonScalar.name, new ScalarTypeSymbol($scalar.name));}
+  | scalar {$type = new ScalarTypeSymbol($scalar.name);}
+  | tuple {System.out.println("Tuples not finished.");}
+  | Identifier {System.out.println("Is this a typedef?");}
   ;
 
-nonScalar
-  : ^(Vector Number?)
-  | ^(Matrix Number? Number?)
+nonScalar returns [String name]
+  : ^(Vector Number?) {$name = "vector";}
+  | ^(Matrix Number? Number?) {$name = "matrix";}
   ;  
 
-scalar
-	: Boolean
-  | Integer
-  | Real
-  | Character
+scalar returns [String name]
+	: Boolean {$name = "boolean";}
+  | Integer {$name = "integer";}
+  | Float {$name = "float";}
+  | Character {$name = "character";}
   ;
   
 tuple
@@ -231,9 +311,9 @@ specifier
   ;
 
 //TODO: add a Type class, and set the return type to $result.type, calculated in the Operations class
-expr returns [String exprType, Result result, String scalarType]
+expr returns [String exprType, Value result, String scalarType]
 @init {
-	List<Result> vecResult = new ArrayList<Result>();
+	List<Value> vecResult = new ArrayList<Value>();
 }
   : ^(Plus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.add($a.result, $b.result);}
   | ^(Minus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.subtract($a.result, $b.result);}
@@ -255,19 +335,24 @@ expr returns [String exprType, Result result, String scalarType]
   | ^(CALL Identifier ^(ARGLIST expr*))
   | ^(As t=type e=expr)
   | Identifier
-  | Number {$exprType = intType; $result = new Result(new Integer($Number.text));}
-  | FPNumber {$exprType = floatType; $result = new Result(new Float($FPNumber.text));}
-  | True {$exprType = boolType; $result = new Result(new Boolean(true));}
-  | False {$exprType = boolType; $result = new Result(new Boolean(false));}
+  {
+  	VariableSymbol vs = (VariableSymbol) currentScope.resolve($Identifier.text);
+  	$exprType = vs.getType().getName();
+  	$result = vs.getValue();
+  }
+  | Number {$exprType = intType; $result = new Value(new Integer($Number.text));}
+  | FPNumber {$exprType = floatType; $result = new Value(new Float($FPNumber.text));}
+  | True {$exprType = boolType; $result = new Value(new Boolean(true));}
+  | False {$exprType = boolType; $result = new Value(new Boolean(false));}
   | Null
-  | Char {$exprType = charType; $result = new Result(new Character(Operations.getCharacter($Char.text)));}
+  | Char {$exprType = charType; $result = new Value(new Character(Operations.getCharacter($Char.text)));}
   | ^(TUPLEEX expr)
   | ^(Dot Identifier)
   | ^(NEG a=expr) {$exprType = $a.exprType; $result = Operations.negative($a.result);}
   | ^(POS a=expr) {$exprType = $a.exprType; $result = $a.result;}
-  | length {$exprType = intType; $result = new Result(new Integer($length.result.vectorResult.size()));}
+  | length {$exprType = intType; $result = new Value(new Integer($length.result.vectorResult.size()));}
   | reverse
-  | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Result(vecResult, $scalarType);}
+  | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Value(vecResult, $scalarType);}
   | ^(Range a=expr b=expr)
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR Identifier a=expr b=expr)

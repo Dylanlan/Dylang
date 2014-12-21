@@ -91,8 +91,8 @@ block
   ;
   
 function
-  : Function Identifier LParen paramlist RParen (Returns type)? (SemiColon | block)
-  -> ^(Function Identifier paramlist ^(Returns["returns"] type?) block?)
+  : Function Identifier LParen paramlist RParen (Returns type)? block
+  -> ^(Function Identifier paramlist ^(Returns["returns"] type?) block)
   ;
   
 paramlist
