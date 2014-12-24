@@ -81,15 +81,15 @@ public class DValue {
 	}
 	
 	public boolean isFloat() {
-		return this.intResult != null;
+		return this.floatResult != null;
 	}
 	
 	public boolean isChar() {
-		return this.intResult != null;
+		return this.charResult != null;
 	}
 	
 	public boolean isBool() {
-		return this.intResult != null;
+		return this.boolResult != null;
 	}
 	
 	public boolean isString() {
