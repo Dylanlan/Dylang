@@ -30,10 +30,10 @@ public class SymbolTable {
         defineType(new NonScalarTypeSymbol("string", new ScalarTypeSymbol("character")));
         defineType(new ScalarTypeSymbol("null"));
         
-        ArrayList<Symbol> params = new ArrayList<Symbol>();
-        params.add(new VariableSymbol("vectorParam", new NonScalarTypeSymbol("vector")));
-        FunctionSymbol funcSym = new FunctionSymbol("length", new ScalarTypeSymbol("integer"), params);
-        defineFunction(funcSym);
+        //ArrayList<Symbol> params = new ArrayList<Symbol>();
+        //params.add(new VariableSymbol("vectorParam", new NonScalarTypeSymbol("vector")));
+        //FunctionSymbol funcSym = new FunctionSymbol("length", new ScalarTypeSymbol("integer"), params);
+        //defineFunction(funcSym);
         
         //defineSpec(new SpecifierSymbol("var"));
         //defineSpec(new SpecifierSymbol("const"));

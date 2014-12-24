@@ -1,10 +1,12 @@
 package com.dylan.symbolTable;
 
+import com.dylan.dnode.*;
+
 public class VariableSymbol extends Symbol {
 	boolean isconst = false;
 	boolean isvar = false;
 	public int scopeNum;
-	public Value value;
+	public DValue value;
 	
 	public VariableSymbol(String name, TypeSymbol type) { 
 		super(name, type); 
@@ -28,11 +30,11 @@ public class VariableSymbol extends Symbol {
 	
 	public boolean isVar() { return this.isvar; }
 	
-	public Value getValue() { return this.value; }
+	public DValue getValue() { return this.value; }
 	
-	public void setValue(Value result) { this.value = result; }
+	public void setValue(DValue result) { this.value = result; }
 	
-	public void setIndexedValue(Value result, Value index) {
+	public void setIndexedValue(DValue result, DValue index) {
 		//TODO: remove this check, handle in a separate tree gramar
 		if (value.vectorResult == null) {
 			System.out.println("Error: Trying to assign value to index of non-indexable variable");

@@ -1,13 +1,14 @@
-package com.dylan.symbolTable;
+package com.dylan.dnode;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Value {
+public class DValue {
 	public Integer intResult;
 	public Float floatResult;
 	public Character charResult;
 	public Boolean boolResult;
-	public List<Value> vectorResult;
+	public List<DValue> vectorResult;
 	public String vectorType;
 	public Object matrixResult;
 	public String matrixType;
@@ -16,29 +17,39 @@ public class Value {
 	public static int VEC_COMMAS = 2;
 	public static int VEC_BRACKETS_COMMAS = 3;
 	
-	public Value() {
+	public DValue() {
 		
 	}
 	
-	public Value(Integer intValue) {
+	public DValue(Integer intValue) {
 		intResult = intValue;
 	}
 	
-	public Value(Float floatValue) {
+	public DValue(Float floatValue) {
 		floatResult = floatValue;
 	}
 	
-	public Value(Character charValue) {
+	public DValue(Character charValue) {
 		charResult = charValue;
 	}
 	
-	public Value(Boolean boolValue) {
+	public DValue(Boolean boolValue) {
 		boolResult = boolValue;
 	}
 	
-	public Value(List<Value> vector, String type) {
+	public DValue(List<DValue> vector, String type) {
 		vectorResult = vector;
 		vectorType = type;
+	}
+	
+	public DValue(String string) {
+		List<DValue> vector = new ArrayList<DValue>();
+		for (int i = 0; i < string.length(); i++) {
+	        Character charac = new Character(string.charAt(i));
+	        vector.add(new DValue(charac));
+	    }
+		this.vectorResult = vector;
+		this.vectorType = "character";
 	}
 	
 	public int getInt() {
@@ -57,12 +68,51 @@ public class Value {
 		return this.boolResult;
 	}
 	
-	public Object getVectorResult() {
+	public List<DValue> getVector() {
 		return this.vectorResult;
 	}
 	
-	public Object getMatrixResult() {
+	public Object getMatrix() {
 		return this.matrixResult;
+	}
+	
+	public boolean isInt() {
+		return this.intResult != null;
+	}
+	
+	public boolean isFloat() {
+		return this.intResult != null;
+	}
+	
+	public boolean isChar() {
+		return this.intResult != null;
+	}
+	
+	public boolean isBool() {
+		return this.intResult != null;
+	}
+	
+	public boolean isVector() {
+		return this.vectorResult != null;
+	}
+	
+	public boolean isNull() {
+		if (!this.isInt() && !this.isFloat() && !this.isChar() &&
+			!this.isBool() && !this.isVector()) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public boolean isScalar() {
+		if (this.isInt() || this.isFloat() || this.isChar() || this.isBool()) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
 	public String getType() {
@@ -85,7 +135,7 @@ public class Value {
 			return "matrix";
 		}
 		else {
-			return "void";
+			return "null";
 		}
 	}
 	
@@ -108,7 +158,7 @@ public class Value {
 			}
 			int size = vectorResult.size();
 			for(int i = 0; i < size; i++) {
-				Value element = vectorResult.get(i);
+				DValue element = vectorResult.get(i);
 				element.print(argument);
 				if (element.charResult == null && i < size - 1) {
 					if (argument == VEC_COMMAS || argument == VEC_BRACKETS_COMMAS) {
@@ -126,4 +176,26 @@ public class Value {
 		}
 	}
 	
+	
+	@Override  
+	public String toString() {  
+		if (this.intResult != null) {
+			return this.intResult.toString();
+		}
+		else if (this.floatResult != null) {
+			return this.floatResult.toString();
+		}
+		else if (this.boolResult != null) {
+			return this.boolResult.toString();
+		}
+		else if (this.charResult != null) {
+			return this.charResult.toString();
+		}
+		else if (this.vectorResult != null) {
+			return "VECTOR";
+		}
+		else {
+			return "null";
+		}
+	}
 }

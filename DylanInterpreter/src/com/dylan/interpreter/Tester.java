@@ -1,10 +1,10 @@
 package com.dylan.interpreter;
 
 import java.io.FileNotFoundException;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -15,6 +15,9 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.DOTTreeGenerator;
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
+
+import com.dylan.dnode.*;
+import com.dylan.symbolTable.FunctionSymbol;
 
 public class Tester {
 	public static void main(String[] args) throws RecognitionException {
@@ -51,8 +54,13 @@ public class Tester {
         		
         		nodes = new CommonTreeNodeStream(ast);
         		nodes.setTokenStream(tokenStream);
-        		Interpreter interpret = new Interpreter(nodes);
-        		interpret.program();
+        		HashMap<String, FunctionSymbol> functions = new HashMap<String, FunctionSymbol>();
+        		Interpreter interpret = new Interpreter(nodes, functions);
+        		DNode node = interpret.program().node;
+        		node.evaluate();
+        		if (functions.containsKey("main")) {
+        			functions.get("main").invoke(new ArrayList<DNode>(), functions);
+        		}
 		//}
 		//catch (RuntimeException e) {
 		//    System.out.println("A problem has occured with the dash input file: " + e.getMessage());

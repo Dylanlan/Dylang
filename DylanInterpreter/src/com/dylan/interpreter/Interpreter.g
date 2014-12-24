@@ -13,92 +13,87 @@ options {
 {
   package com.dylan.interpreter;
   import com.dylan.symbolTable.*;
+  import com.dylan.dnode.*;
 }
 
 @members
 {
 	SymbolTable symTab = new SymbolTable();
-	Scope currentScope;
+	Scope currentScope = null;
+	Map<String, FunctionSymbol> functions = null;
 	String intType = "int";
 	String floatType = "float";
 	String charType = "char";
 	String boolType = "bool";
-	int scopeCounter = 0;
-  int numLoop = 0;
   int scopeNumber = 0;
-	
-	boolean currentlyExecuting = true;
-	
-	// Need to get this information in an earlier tree grammar, then pass it here
-	boolean hasMain = true;
 	
 	private int getCurrentScopeNum() {
   	return currentScope.scopeNum;
+  }
+  
+  public Interpreter(CommonTreeNodeStream nodes, Map<String, FunctionSymbol> fns) {
+    this(nodes);
+    currentScope = this.symTab.globals;
+    functions = fns;
+  }
+  
+  public Interpreter(CommonTreeNodeStream nds, Scope sc, Map<String, FunctionSymbol> fns) {
+    this(nds);
+    currentScope = sc;
+    functions = fns;
   }
 	
 }
 
 
-program
-  : ^(PROGRAM 
-  {
-  	if (hasMain) {
-  		currentlyExecuting = false;
-  	}
-  }
-  mainblock)
+program returns [DNode node]
+  : ^(PROGRAM mainblock) {$node = $mainblock.node;}
   ;
   
-mainblock
-  : globalStatement*
+mainblock returns [DNode node]
+@init {
+	BlockNode bn = new BlockNode();
+	$node = bn;
+}
+  : (globalStatement {bn.addStatement($globalStatement.node);})*
   ;
   
-globalStatement
-  : statement
-  | function
+globalStatement returns [DNode node]
+  : statement {$node = $statement.node;}
+  | function {$node = new EmptyNode();}
   ;
   
-statement
+statement returns [DNode node]
   : assignment
-  | declaration
-  | print
+  | declaration {$node = $declaration.node;}
+  | print {$node = $print.node;}
   | ifstatement
   | loopstatement
   | block
   | callStatement
-  | returnStatement
+  | returnStatement {$node = $returnStatement.node;}
   | Break
   | Continue
   ;
 
-print
-  : ^(Print value=expr arg=expr?)
-  {
-  	if (currentlyExecuting) {
-	  	if ($arg.text != null) {
-	  		int argument = $arg.result.intResult;
-	  		$value.result.print(argument);  	
-	  	}
-	  	else {
-	  		$value.result.print(0);
-	  	}
-	  }
-  }
+print returns [DNode node]
+  : ^(Print value=expr arg=expr) {$node = new PrintNode($value.node, $arg.node);}
+  | ^(Print value=expr) {$node = new PrintNode($value.node);}
   ;
   
-length returns [String scalarType, Value result]
-	: ^(Length expr) {$scalarType = $expr.scalarType; $result = $expr.result;}
+length returns [DNode node]
+	: ^(Length expr)
 	;
 	
-reverse returns [String scalarType, Value result]
-	: ^(Reverse expr) {$scalarType = $expr.scalarType; $result = $expr.result;}
+reverse returns [DNode node]
+	: ^(Reverse expr)
 	;
 
-declaration
+declaration returns [DNode node]
 @init {
 	VariableSymbol vs = null;
 	int currentScopeNum = getCurrentScopeNum();
-	Value result = null;
+	DValue result = null;
 }
 @after {
 	Symbol spec;
@@ -117,16 +112,26 @@ declaration
   }
   
   currentScope.define(vs);
+  $node = new EmptyNode();
 }
 	: ^(DECL s=specifier? t=type id=Identifier)
-	| ^(DECL s=specifier? t=type ^(Assign id=Identifier expr {result = $expr.result;}))
+	| ^(DECL s=specifier? t=type ^(Assign id=Identifier expr {result = $expr.node.evaluate();}))
 	;
 
-block
-  : ^(BLOCK statement*)
+block returns [DNode node]
+@init { 
+  BlockNode bn = new BlockNode(); 
+  $node = bn; 
+  //Scope scope = new Scope(currentScope); 
+  //currentScope = scope; 
+}  
+@after { 
+  //currentScope = currentScope.parent(); 
+}
+  : ^(BLOCK (statement  {bn.addStatement($statement.node);})*)
   ;
   
-function
+function returns [DNode node]
 @init {
 	TypeSymbol type = null;
 }
@@ -139,38 +144,22 @@ function
 		type = new ScalarTypeSymbol("null");
 	}
 	
-	FunctionSymbol fs = new FunctionSymbol($id.text, type);
+	FunctionSymbol fs = new FunctionSymbol($id.text, type, $p.tree, $b.tree);
 	symTab.defineFunction(fs);
+	functions.put($id.text, fs);
 	currentScope = currentScope.getEnclosingScope();
 }
-  : ^(Function id=Identifier paramlist ^(Returns t=type?)
-  {
-	  if (hasMain && $Identifier.text.equals("main") && !currentlyExecuting) {
-	  	currentlyExecuting = true;
-	  }
-	  else {
-	  	currentlyExecuting = false;
-	  }
-	}
-  block)
-  {
-  	if (hasMain) {
-  		currentlyExecuting = false;
-  	}
-  	else {
-  		currentlyExecuting = true;
-  	}
-  }
+  : ^(Function id=Identifier p=paramlist ^(Returns t=type?) b=block)
   ;
   
-paramlist
+paramlist returns [DNode node]
 @after {
 	scopeNumber++;
 }
   : ^(PARAMLIST {	currentScope = new Scope("paramscope", currentScope, scopeNumber);} p+=parameter*)
   ;
   
-parameter
+parameter returns [DNode node]
 @init {
 	VariableSymbol vs = null;
 	int currentScopeNum = getCurrentScopeNum();
@@ -193,15 +182,16 @@ parameter
   : ^(id=Identifier s=specifier? t=type)
   ;
   
-callStatement
+callStatement returns [DNode node]
   : ^(CALL Identifier ^(ARGLIST expr*))
   ;
   
-returnStatement
-  : ^(Return expr?)
+returnStatement returns [DNode node]
+  : ^(Return expr) {$node = $expr.node;}
+  | Return {$node = new EmptyNode();}
   ;
   
-assignment
+assignment returns [DNode node]
 @init {
 	VariableSymbol vs = null;
 	TypeSymbol variableType = null;
@@ -210,76 +200,27 @@ assignment
   : ^(Assign Identifier value=expr)
   {
   	vs = (VariableSymbol) currentScope.resolve($Identifier.text);
-  	vs.setValue($value.result);
   }
   | ^(Assign ^(INDEX Identifier index=expr) value=expr)
   {
   	vs = (VariableSymbol) currentScope.resolve($Identifier.text);
-  	vs.setIndexedValue($value.result, $index.result);
   }
   ;
   
-ifstatement
-@init {
-	boolean haltedExecution = false;
-}
-@after {
-	// If we stopped execution due to failing condition, continue executing after leaving this 'if' block
-	if (haltedExecution) {
-		currentlyExecuting = true;
-	}
-}
-  : ^(If expr 
-  {
-  	// If we are currently executing code, and we fail the conditional,
-  	// then signify that we've stopped executing this block of code
-  	if (currentlyExecuting && 
-  			(($expr.result.boolResult != null && !$expr.result.boolResult) ||
-  			 ($expr.result.intResult != null && $expr.result.intResult == 0) ||
-  			 ($expr.result.floatResult != null && $expr.result.floatResult == 0))) {
-  		currentlyExecuting = false;
-  		haltedExecution = true;
-  	}
-  }
-  slist ^(Else
-  {
-  	// If the 'if' statement failed, this 'else' should execute
-  	if (haltedExecution) {
-  		currentlyExecuting = true;
-  	}
-  	// Otherwise, the 'if' statement executed, so this 'else' should not
-  	else {
-  		currentlyExecuting = false;
-  		haltedExecution = true;
-  	}
-  }
-  slist))
-  | ^(If expr
-  {
-  	// If we are currently executing code, and we fail the conditional,
-  	// then signify that we've stopped executing this block of code
-  	if (currentlyExecuting && 
-  			(($expr.result.boolResult != null && !$expr.result.boolResult) ||
-  			 ($expr.result.intResult != null && $expr.result.intResult == 0) ||
-  			 ($expr.result.floatResult != null && $expr.result.floatResult == 0))) {
-  		currentlyExecuting = false;
-  		haltedExecution = true;
-  	}
-  }
-  slist)
-  
+ifstatement returns [DNode node]
+  : ^(If expr slist ^(Else slist))
+  | ^(If expr slist)
   ;
   
-loopstatement
+loopstatement returns [DNode node]
   : ^(Loop ^(While e=expr) slist)
   | ^(Loop slist ^(While e=expr))
   | ^(Loop slist)
   ;
   
-slist
-  : block
-  | statement
-  | declaration
+slist returns [DNode node]
+  : block {$node = $block.node;}
+  | statement {BlockNode bn = new BlockNode(); bn.addStatement($statement.node); $node = bn;}
   ;
 
 type returns [TypeSymbol type]
@@ -310,49 +251,47 @@ specifier
   | Var
   ;
 
-//TODO: add a Type class, and set the return type to $result.type, calculated in the Operations class
-expr returns [String exprType, Value result, String scalarType]
+expr returns [DNode node]
 @init {
-	List<Value> vecResult = new ArrayList<Value>();
+	List<DValue> vecResult = new ArrayList<DValue>();
 }
-  : ^(Plus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.add($a.result, $b.result);}
-  | ^(Minus a=expr b=expr) {$exprType = $a.exprType; $result = Operations.subtract($a.result, $b.result);}
-  | ^(Multiply a=expr b=expr) {$exprType = $a.exprType; $result = Operations.multiply($a.result, $b.result);}
-  | ^(Divide a=expr b=expr) {$exprType = $a.exprType; $result = Operations.divide($a.result, $b.result);}
-  | ^(Mod a=expr b=expr) {$exprType = $a.exprType; $result = Operations.mod($a.result, $b.result);}
-  | ^(Exponent a=expr b=expr) {$exprType = $a.exprType; $result = Operations.exponent($a.result, $b.result);}
-  | ^(Equals a=expr b=expr) {$exprType = boolType; $result = Operations.equals($a.result, $b.result);}
-  | ^(NEquals a=expr b=expr) {$exprType = boolType; $result = Operations.notEquals($a.result, $b.result);}
-  | ^(GThan a=expr b=expr) {$exprType = boolType; $result = Operations.greaterThan($a.result, $b.result);}
-  | ^(LThan a=expr b=expr) {$exprType = boolType; $result = Operations.lessThan($a.result, $b.result);}
-  | ^(GThanE a=expr b=expr) {$exprType = boolType; $result = Operations.greaterThanEqual($a.result, $b.result);}
-  | ^(LThanE a=expr b=expr) {$exprType = boolType; $result = Operations.lessThanEqual($a.result, $b.result);}
-  | ^(Or a=expr b=expr) {$exprType = $a.exprType; $result = Operations.or($a.result, $b.result);}
-  | ^(Xor a=expr b=expr) {$exprType = $a.exprType; $result = Operations.xor($a.result, $b.result);}
-  | ^(And a=expr b=expr) {$exprType = $a.exprType; $result = Operations.and($a.result, $b.result);}
-  | ^(Not a=expr) {$exprType = boolType; $result = Operations.not($a.result);}
+  : ^(Plus a=expr b=expr) {$node = new AddNode($a.node, $b.node);}
+  | ^(Minus a=expr b=expr)
+  | ^(Multiply a=expr b=expr)
+  | ^(Divide a=expr b=expr)
+  | ^(Mod a=expr b=expr)
+  | ^(Exponent a=expr b=expr)
+  | ^(Equals a=expr b=expr)
+  | ^(NEquals a=expr b=expr)
+  | ^(GThan a=expr b=expr)
+  | ^(LThan a=expr b=expr)
+  | ^(GThanE a=expr b=expr)
+  | ^(LThanE a=expr b=expr)
+  | ^(Or a=expr b=expr)
+  | ^(Xor a=expr b=expr)
+  | ^(And a=expr b=expr)
+  | ^(Not a=expr)
   | ^(By expr expr)
   | ^(CALL Identifier ^(ARGLIST expr*))
   | ^(As t=type e=expr)
   | Identifier
   {
   	VariableSymbol vs = (VariableSymbol) currentScope.resolve($Identifier.text);
-  	$exprType = vs.getType().getName();
-  	$result = vs.getValue();
+  	$node = new AtomNode(vs.value);
   }
-  | Number {$exprType = intType; $result = new Value(new Integer($Number.text));}
-  | FPNumber {$exprType = floatType; $result = new Value(new Float($FPNumber.text));}
-  | True {$exprType = boolType; $result = new Value(new Boolean(true));}
-  | False {$exprType = boolType; $result = new Value(new Boolean(false));}
-  | Null
-  | Char {$exprType = charType; $result = new Value(new Character(Operations.getCharacter($Char.text)));}
+  | Number {$node = new AtomNode(new DValue(new Integer($Number.text)));}
+  | FPNumber {$node = new AtomNode(new DValue(new Float($FPNumber.text)));}
+  | True {$node = new AtomNode(new DValue(new Boolean(true)));}
+  | False {$node = new AtomNode(new DValue(new Boolean(false)));}
+  | Null {$node = new AtomNode(new DValue());}
+  | Char {$node = new AtomNode(new DValue(new Character(Operations.getCharacter($Char.text))));}
   | ^(TUPLEEX expr)
   | ^(Dot Identifier)
-  | ^(NEG a=expr) {$exprType = $a.exprType; $result = Operations.negative($a.result);}
-  | ^(POS a=expr) {$exprType = $a.exprType; $result = $a.result;}
-  | length {$exprType = intType; $result = new Value(new Integer($length.result.vectorResult.size()));}
+  | ^(NEG a=expr)
+  | ^(POS a=expr)
+  | length
   | reverse
-  | ^(VCONST (a=expr {vecResult.add($a.result); $scalarType = $a.exprType;})+) {$exprType = "vector"; $result = new Value(vecResult, $scalarType);}
+  | ^(VCONST (a=expr {vecResult.add($a.node.evaluate());})+) {$node = new AtomNode(new DValue(vecResult, vecResult.get(0).getType()));}
   | ^(Range a=expr b=expr)
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR Identifier a=expr b=expr)

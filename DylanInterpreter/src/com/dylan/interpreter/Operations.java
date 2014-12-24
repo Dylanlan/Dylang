@@ -3,7 +3,7 @@ package com.dylan.interpreter;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.dylan.symbolTable.Value;
+import com.dylan.dnode.*;
 
 //TODO: figure out and finish all type operations, note: can handle adding characters and strings to concatenate??!!
 public class Operations {
@@ -59,8 +59,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value add(Value a, Value b) {
-		Value result = new Value();
+	public static DValue add(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.intResult = a.intResult + b.intResult;
@@ -71,14 +71,14 @@ public class Operations {
 		
 		else if (a.vectorType != null && b.vectorType != null) {
 			if (a.vectorType.equals("char") && b.vectorType.equals("char")) {
-				List<Value> concat = new ArrayList<Value>();
+				List<DValue> concat = new ArrayList<DValue>();
 				concat.addAll(a.vectorResult);
 				concat.addAll(b.vectorResult);
 				result.vectorResult = concat;
 				result.vectorType = a.vectorType;
 			}
 			else if (a.vectorType.equals("int") && b.vectorType.equals("int")) {
-				List<Value> resultVector = new ArrayList<Value>();
+				List<DValue> resultVector = new ArrayList<DValue>();
 				int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
 				for (int i = 0; i < maxSize; i++) {
 					int ai = 0;
@@ -89,7 +89,7 @@ public class Operations {
 					if (i < b.vectorResult.size()) {
 						bi = b.vectorResult.get(i).intResult;
 					}
-					resultVector.add(new Value(new Integer(ai + bi)));
+					resultVector.add(new DValue(new Integer(ai + bi)));
 				}
 				result.vectorResult = resultVector;
 				result.vectorType = a.vectorType;
@@ -105,8 +105,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value subtract(Value a, Value b) {
-		Value result = new Value();
+	public static DValue subtract(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.intResult = a.intResult - b.intResult;
@@ -121,8 +121,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value multiply(Value a, Value b) {
-		Value result = new Value();
+	public static DValue multiply(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.intResult = a.intResult * b.intResult;
@@ -137,8 +137,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value divide(Value a, Value b) {
-		Value result = new Value();
+	public static DValue divide(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			if (b.intResult == 0) {
@@ -159,8 +159,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value mod(Value a, Value b) {
-		Value result = new Value();
+	public static DValue mod(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			if (b.intResult == 0) {
@@ -181,8 +181,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value exponent(Value a, Value b) {
-		Value result = new Value();
+	public static DValue exponent(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.intResult = (int)Math.pow(a.intResult, b.intResult);
@@ -197,8 +197,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value equals(Value a, Value b) {
-		Value result = new Value();
+	public static DValue equals(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.boolResult = a.intResult.intValue() == b.intResult.intValue();
@@ -213,8 +213,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value notEquals(Value a, Value b) {
-		Value result = new Value();
+	public static DValue notEquals(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.boolResult = a.intResult.intValue() != b.intResult.intValue();
@@ -229,8 +229,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value lessThan(Value a, Value b) {
-		Value result = new Value();
+	public static DValue lessThan(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.boolResult = a.intResult < b.intResult;
@@ -245,8 +245,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value greaterThan(Value a, Value b) {
-		Value result = new Value();
+	public static DValue greaterThan(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.boolResult = a.intResult > b.intResult;
@@ -261,8 +261,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value lessThanEqual(Value a, Value b) {
-		Value result = new Value();
+	public static DValue lessThanEqual(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.boolResult = a.intResult <= b.intResult;
@@ -277,8 +277,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value greaterThanEqual(Value a, Value b) {
-		Value result = new Value();
+	public static DValue greaterThanEqual(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null && b.intResult != null) {
 			result.boolResult = a.intResult >= b.intResult;
@@ -293,8 +293,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value or(Value a, Value b) {
-		Value result = new Value();
+	public static DValue or(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.boolResult != null && b.boolResult != null) {
 			result.boolResult = a.boolResult || b.boolResult;
@@ -306,8 +306,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value xor(Value a, Value b) {
-		Value result = new Value();
+	public static DValue xor(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.boolResult != null && b.boolResult != null) {
 			result.boolResult = a.boolResult ^ b.boolResult;
@@ -319,8 +319,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value and(Value a, Value b) {
-		Value result = new Value();
+	public static DValue and(DValue a, DValue b) {
+		DValue result = new DValue();
 		
 		if (a.boolResult != null && b.boolResult != null) {
 			result.boolResult = a.boolResult && b.boolResult;
@@ -332,8 +332,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value not(Value a) {
-		Value result = new Value();
+	public static DValue not(DValue a) {
+		DValue result = new DValue();
 		
 		if (a.boolResult != null) {
 			result.boolResult = !a.boolResult;
@@ -345,8 +345,8 @@ public class Operations {
 		return result;
 	}
 	
-	public static Value negative(Value a) {
-		Value result = new Value();
+	public static DValue negative(DValue a) {
+		DValue result = new DValue();
 		
 		if (a.intResult != null) {
 			result.intResult = -a.intResult;
