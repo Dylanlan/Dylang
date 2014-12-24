@@ -42,6 +42,57 @@ options {
     currentScope = sc;
     functions = fns;
   }
+  
+  public Character getCharacter(String quoted) {
+		//TODO: clean up the copy/paste code, and handle more escapes 
+		Character result = null;
+		if (quoted.length() > 2 && quoted.charAt(0) == '\'' && quoted.charAt(1) == '\\') {
+			char escaped = quoted.charAt(2);
+			if (escaped == 'n') {
+				result = new Character('\n');
+			}
+			else if (escaped == 't') {
+				result = new Character('\t');
+			}
+			else if (escaped == '\\') {
+				result = new Character('\\');
+			}
+			else if (escaped == '\'') {
+				result = new Character('\'');
+			}
+			else if (escaped == '\"') {
+				result = new Character('\"');
+			}
+			else {
+				result = new Character(escaped);
+			}
+		}
+		else if (quoted.length() > 1 && quoted.charAt(0) == '\\') {
+			char escaped = quoted.charAt(1);
+			if (escaped == 'n') {
+				result = new Character('\n');
+			}
+			else if (escaped == 't') {
+				result = new Character('\t');
+			}
+			else if (escaped == '\\') {
+				result = new Character('\\');
+			}
+			else if (escaped == '\'') {
+				result = new Character('\'');
+			}
+			else if (escaped == '\"') {
+				result = new Character('\"');
+			}
+			else {
+				result = new Character(escaped);
+			}
+		}
+		else {
+			result = new Character(quoted.replaceAll("'", "").charAt(0));
+		}
+		return result;
+	}
 	
 }
 
@@ -256,21 +307,21 @@ expr returns [DNode node]
 	List<DValue> vecResult = new ArrayList<DValue>();
 }
   : ^(Plus a=expr b=expr) {$node = new AddNode($a.node, $b.node);}
-  | ^(Minus a=expr b=expr)
-  | ^(Multiply a=expr b=expr)
-  | ^(Divide a=expr b=expr)
-  | ^(Mod a=expr b=expr)
-  | ^(Exponent a=expr b=expr)
-  | ^(Equals a=expr b=expr)
-  | ^(NEquals a=expr b=expr)
-  | ^(GThan a=expr b=expr)
-  | ^(LThan a=expr b=expr)
-  | ^(GThanE a=expr b=expr)
-  | ^(LThanE a=expr b=expr)
-  | ^(Or a=expr b=expr)
-  | ^(Xor a=expr b=expr)
-  | ^(And a=expr b=expr)
-  | ^(Not a=expr)
+  | ^(Minus a=expr b=expr) {$node = new SubtractNode($a.node, $b.node);}
+  | ^(Multiply a=expr b=expr) {$node = new MultiplyNode($a.node, $b.node);}
+  | ^(Divide a=expr b=expr) {$node = new DivideNode($a.node, $b.node);}
+  | ^(Mod a=expr b=expr) {$node = new ModNode($a.node, $b.node);}
+  | ^(Exponent a=expr b=expr) {$node = new ExponentNode($a.node, $b.node);}
+  | ^(Equals a=expr b=expr) {$node = new EqualsNode($a.node, $b.node);}
+  | ^(NEquals a=expr b=expr) {$node = new NotEqualsNode($a.node, $b.node);}
+  | ^(GThan a=expr b=expr) {$node = new GreaterThanNode($a.node, $b.node);}
+  | ^(LThan a=expr b=expr) {$node = new LessThanNode($a.node, $b.node);}
+  | ^(GThanE a=expr b=expr) {$node = new GreaterThanEqualNode($a.node, $b.node);}
+  | ^(LThanE a=expr b=expr) {$node = new LessThanEqualNode($a.node, $b.node);}
+  | ^(Or a=expr b=expr) {$node = new OrNode($a.node, $b.node);}
+  | ^(Xor a=expr b=expr) {$node = new XorNode($a.node, $b.node);}
+  | ^(And a=expr b=expr) {$node = new AndNode($a.node, $b.node);}
+  | ^(Not a=expr) {$node = new NotNode($a.node);}
   | ^(By expr expr)
   | ^(CALL Identifier ^(ARGLIST expr*))
   | ^(As t=type e=expr)
@@ -284,11 +335,11 @@ expr returns [DNode node]
   | True {$node = new AtomNode(new DValue(new Boolean(true)));}
   | False {$node = new AtomNode(new DValue(new Boolean(false)));}
   | Null {$node = new AtomNode(new DValue());}
-  | Char {$node = new AtomNode(new DValue(new Character(Operations.getCharacter($Char.text))));}
+  | Char {$node = new AtomNode(new DValue(new Character(getCharacter($Char.text))));}
   | ^(TUPLEEX expr)
   | ^(Dot Identifier)
-  | ^(NEG a=expr)
-  | ^(POS a=expr)
+  | ^(NEG a=expr) {$node = new NegativeNode($a.node);}
+  | ^(POS a=expr) {$node = $a.node;}
   | length
   | reverse
   | ^(VCONST (a=expr {vecResult.add($a.node.evaluate());})+) {$node = new AtomNode(new DValue(vecResult, vecResult.get(0).getType()));}

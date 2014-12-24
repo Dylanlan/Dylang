@@ -3,11 +3,11 @@ package com.dylan.dnode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddNode implements DNode {
+public class SubtractNode implements DNode {
 	private DNode lhs;  
 	private DNode rhs;  
 	  
-	public AddNode(DNode lhs, DNode rhs) {  
+	public SubtractNode(DNode lhs, DNode rhs) {  
 		this.lhs = lhs;  
 		this.rhs = rhs;  
 	}  
@@ -19,19 +19,11 @@ public class AddNode implements DNode {
 		DValue b = rhs.evaluate();  
  
 		if(a.intResult != null && b.intResult != null) {  
-			return new DValue(a.intResult + b.intResult);  
+			return new DValue(a.intResult - b.intResult);  
 		}
 		
 		if(a.floatResult != null && b.floatResult != null) {  
-			return new DValue(a.floatResult + b.floatResult);  
-		}
-		
-		if (a.charResult != null && b.charResult != null) {
-			return new DValue(a.charResult.toString() + b.charResult.toString());
-		}
-		 
-		if(a.isString() || b.isString()) {  
-			return new DValue(a.toString() + "" + b.toString());  
+			return new DValue(a.floatResult - b.floatResult);  
 		}
 		
 		if (a.vectorType.equals("int") && b.vectorType.equals("int")) {
@@ -46,7 +38,7 @@ public class AddNode implements DNode {
 				if (i < b.vectorResult.size()) {
 					bi = b.vectorResult.get(i).intResult;
 				}
-				resultVector.add(new DValue(new Integer(ai + bi)));
+				resultVector.add(new DValue(new Integer(ai - bi)));
 			}
 			
 			DValue result = new DValue(resultVector, a.vectorType);
@@ -58,6 +50,6 @@ public class AddNode implements DNode {
 
 	@Override  
 	public String toString() {  
-		return String.format("(%s + %s)", lhs, rhs);  
+		return String.format("(%s - %s)", lhs, rhs);  
 	}
 }

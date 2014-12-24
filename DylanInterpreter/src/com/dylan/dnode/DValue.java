@@ -9,9 +9,9 @@ public class DValue {
 	public Character charResult;
 	public Boolean boolResult;
 	public List<DValue> vectorResult;
-	public String vectorType;
+	public String vectorType = "";
 	public Object matrixResult;
-	public String matrixType;
+	public String matrixType = "";
 	
 	public static int VEC_BRACKETS = 1;
 	public static int VEC_COMMAS = 2;
@@ -92,6 +92,10 @@ public class DValue {
 		return this.intResult != null;
 	}
 	
+	public boolean isString() {
+		return this.isVector() && this.vectorType.equals("char");
+	}
+	
 	public boolean isVector() {
 		return this.vectorResult != null;
 	}
@@ -140,59 +144,50 @@ public class DValue {
 	}
 	
 	public void print(int argument) {
+		System.out.print(this.toString(argument));
+	}
+	
+	@Override  
+	public String toString() {
+		return this.toString(0);
+	}
+	
+	public String toString(int argument) {
 		if (intResult != null) {
-			System.out.print(intResult);
+			return this.intResult.toString();
 		}
 		else if (floatResult != null) {
-			System.out.print(floatResult);
+			return this.floatResult.toString();
 		}
 		else if (charResult != null) {
-			System.out.print(charResult);
+			return this.charResult.toString();
 		}
 		else if (boolResult != null) {
-			System.out.print(boolResult);
+			return this.boolResult.toString();
 		}
 		else if (vectorResult != null) {
+			String result = "";
 			if (argument == VEC_BRACKETS || argument == VEC_BRACKETS_COMMAS) {
-				System.out.print("[");
+				result += "[";
 			}
 			int size = vectorResult.size();
 			for(int i = 0; i < size; i++) {
 				DValue element = vectorResult.get(i);
-				element.print(argument);
+				result += element.toString(argument);
 				if (element.charResult == null && i < size - 1) {
 					if (argument == VEC_COMMAS || argument == VEC_BRACKETS_COMMAS) {
-						System.out.print(",");
+						result += ",";
 					}
-					System.out.print(" ");
+					result += " ";
 				}
 			}
 			if (argument == VEC_BRACKETS || argument == VEC_BRACKETS_COMMAS) {
-				System.out.print("]");
+				result += "]";
 			}
+			return result;
 		}
 		else if (matrixResult != null) {
-			System.out.print(matrixResult);
-		}
-	}
-	
-	
-	@Override  
-	public String toString() {  
-		if (this.intResult != null) {
-			return this.intResult.toString();
-		}
-		else if (this.floatResult != null) {
-			return this.floatResult.toString();
-		}
-		else if (this.boolResult != null) {
-			return this.boolResult.toString();
-		}
-		else if (this.charResult != null) {
-			return this.charResult.toString();
-		}
-		else if (this.vectorResult != null) {
-			return "VECTOR";
+			return "Matrix!!";
 		}
 		else {
 			return "null";
