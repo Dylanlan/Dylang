@@ -5,20 +5,12 @@ import java.util.Map;
 
 public class Scope {
 	String name;
-	public int scopeNum;
 	public Map<String, Symbol> symbols = new HashMap<String, Symbol>();
 	Scope enclosingScope;
 
 	public Scope(String name, Scope enclosingScope) {
 		this.enclosingScope = enclosingScope;
 		this.name = name;
-		this.scopeNum = 1;
-	}
-
-	public Scope(String name, Scope enclosingScope, int scopeNum) {
-		this.enclosingScope = enclosingScope;
-		this.name = name;
-		this.scopeNum = scopeNum;
 	}
 
 	public String getScopeName() { return this.name; }

@@ -122,8 +122,8 @@ ifstatement
   ;
   
 loopstatement
-  : Loop While expr slist -> ^(Loop ^(While expr) slist)
-  | Loop slist (While expr)? -> ^(Loop slist ^(While expr)?)
+  : While expr slist -> ^(While expr slist)
+  | Do slist While expr -> ^(Do slist ^(While expr))
   ;
   
 slist
@@ -300,8 +300,8 @@ Returns   : 'returns';
 Typedef   : 'typedef';
 If        : 'if';
 Else      : 'else';
-Loop      : 'loop';
 While     : 'while';
+Do				: 'do';
 Break     : 'break';
 Continue  : 'continue';
 Return    : 'return';

@@ -25,11 +25,6 @@ options {
 	String floatType = "float";
 	String charType = "char";
 	String boolType = "bool";
-  int scopeNumber = 0;
-	
-	private int getCurrentScopeNum() {
-  	return currentScope.scopeNum;
-  }
   
   public Interpreter(CommonTreeNodeStream nodes, Map<String, FunctionSymbol> fns) {
     this(nodes);
@@ -92,43 +87,21 @@ reverse returns [DNode node]
 declaration returns [DNode node]
 @init {
 	VariableSymbol vs = null;
-	int currentScopeNum = getCurrentScopeNum();
 	DValue result = null;
 }
-@after {
-	Symbol spec;
-	if ($s.text == null) {
-  	spec = new Symbol("var");
-  }
-  else {
-  	spec = new Symbol($s.text);
-  }
-  
-  vs = new VariableSymbol($id.text, $t.type, spec);
-  vs.scopeNum = currentScopeNum;
-  
-  if (result != null) {
-  	vs.setValue(result);
-  }
-  
-  currentScope.define(vs);
-  $node = new EmptyNode();
-}
 	: ^(DECL s=specifier? t=type id=Identifier)
-	| ^(DECL s=specifier? t=type ^(Assign id=Identifier expr {result = $expr.node.evaluate();}))
+	| ^(DECL s=specifier? t=type ^(Assign id=Identifier value=expr)) {$node = new DeclarationNode($id.text, $value.node, currentScope);}
 	;
 
 block returns [DNode node]
 @init { 
   BlockNode bn = new BlockNode(); 
-  $node = bn; 
-  //Scope scope = new Scope(currentScope); 
-  //currentScope = scope; 
+  $node = bn;
 }  
 @after { 
-  //currentScope = currentScope.parent(); 
+  currentScope = currentScope.getEnclosingScope(); 
 }
-  : ^(BLOCK (statement  {bn.addStatement($statement.node);})*)
+  : ^(BLOCK {	currentScope = new Scope("blockscope", currentScope);} (statement  {bn.addStatement($statement.node);})*)
   ;
   
 function returns [DNode node]
@@ -153,16 +126,12 @@ function returns [DNode node]
   ;
   
 paramlist returns [DNode node]
-@after {
-	scopeNumber++;
-}
-  : ^(PARAMLIST {	currentScope = new Scope("paramscope", currentScope, scopeNumber);} p+=parameter*)
+  : ^(PARAMLIST {	currentScope = new Scope("paramscope", currentScope);} p+=parameter*)
   ;
   
 parameter returns [DNode node]
 @init {
 	VariableSymbol vs = null;
-	int currentScopeNum = getCurrentScopeNum();
 	String paramType = null;
 }
 @after {
@@ -175,7 +144,6 @@ parameter returns [DNode node]
   }
   
   vs = new VariableSymbol($id.text, $t.type, spec);
-  vs.scopeNum = currentScopeNum;
   
   currentScope.define(vs);
 }
@@ -197,19 +165,8 @@ assignment returns [DNode node]
 	TypeSymbol variableType = null;
 	TypeSymbol scalarType = null;
 }
-@after {
-	$node = new EmptyNode();
-}
-  : ^(Assign Identifier value=expr)
-  {
-  	vs = (VariableSymbol) currentScope.resolve($Identifier.text);
-  	vs.setValue($value.node.evaluate());
-  }
+  : ^(Assign id=Identifier value=expr) {$node = new AssignmentNode($id.text, $value.node, currentScope);}
   | ^(Assign ^(INDEX Identifier index=expr) value=expr)
-  {
-  	vs = (VariableSymbol) currentScope.resolve($Identifier.text);
-  	vs.setIndexedValue($value.node.evaluate(), $index.node.evaluate());
-  }
   ;
   
 ifstatement returns [DNode node]
@@ -218,9 +175,8 @@ ifstatement returns [DNode node]
   ;
   
 loopstatement returns [DNode node]
-  : ^(Loop ^(While e=expr) slist)
-  | ^(Loop slist ^(While e=expr))
-  | ^(Loop slist)
+  : ^(While cond1=expr block1=slist) {$node = new WhileNode($cond1.node, $block1.node, 0);}
+  | ^(Do block2=slist ^(While cond2=expr)) {$node = new WhileNode($cond2.node, $block2.node, 1);}
   ;
   
 slist returns [DNode node]
@@ -279,11 +235,7 @@ expr returns [DNode node]
   | ^(By expr expr)
   | ^(CALL Identifier ^(ARGLIST expr*))
   | ^(As t=type e=expr)
-  | Identifier
-  {
-  	VariableSymbol vs = (VariableSymbol) currentScope.resolve($Identifier.text);
-  	$node = new AtomNode(vs.value);
-  }
+  | Identifier {$node = new VariableNode($Identifier.text, currentScope);}
   | Number {$node = new AtomNode(new DValue(new Integer($Number.text)));}
   | FPNumber {$node = new AtomNode(new DValue(new Float($FPNumber.text)));}
   | True {$node = new AtomNode(new DValue(new Boolean(true)));}

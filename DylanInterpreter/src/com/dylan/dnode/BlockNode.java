@@ -3,6 +3,7 @@ package com.dylan.dnode;
 import java.util.List;
 import java.util.ArrayList;
 
+//TODO: block node should push and pop scopes? to handle var declaration in loop??
 public class BlockNode implements DNode {
 	private List<DNode> statements;  
 

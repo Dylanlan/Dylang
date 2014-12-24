@@ -11,7 +11,7 @@ public class SymbolTable {
     Map<String, FunctionSymbol> functionSymbols;
     
     public SymbolTable() { 
-    	this.globals = new Scope("global", null, 0);
+    	this.globals = new Scope("global", null);
     	this.types = new HashMap<String, TypeSymbol>();
     	this.functionSymbols = new HashMap<String, FunctionSymbol>();
     	//this.specs = new HashMap<String, BuiltInTypeSymbol>();
