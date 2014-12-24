@@ -40,7 +40,6 @@ options {
 	
 }
 
-
 program returns [DNode node]
   : ^(PROGRAM mainblock) {$node = $mainblock.node;}
   ;
