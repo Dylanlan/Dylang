@@ -1,0 +1,33 @@
+package com.dylan.dnode;
+
+import com.dylan.symbolTable.NonScalarTypeSymbol;
+import com.dylan.symbolTable.ScalarTypeSymbol;
+import com.dylan.symbolTable.Scope;
+import com.dylan.symbolTable.TypeSymbol;
+import com.dylan.symbolTable.VariableSymbol;
+
+public class MinusAssignNode implements DNode {
+	private String name;
+	private DNode value;
+	private Scope scope;
+	
+	public MinusAssignNode(String name, DNode value, Scope scope) {
+		this.name = name;
+		this.value = value;
+		this.scope = scope;
+	}
+	
+	public DValue evaluate() {
+		VariableSymbol vs = (VariableSymbol)scope.resolve(this.name);
+		
+		if (vs != null) {
+			SubtractNode result = new SubtractNode(new AtomNode(vs.getValue()), this.value);
+			vs.setValue(result.evaluate());
+		}
+		else {
+			throw new RuntimeException("Assigning to undefined variable: " + this.name);
+		}
+		
+		return new DValue();
+	}
+}

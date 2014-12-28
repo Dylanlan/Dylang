@@ -165,7 +165,12 @@ assignment returns [DNode node]
 	TypeSymbol scalarType = null;
 }
   : ^(Assign id=Identifier value=expr) {$node = new AssignmentNode($id.text, $value.node, currentScope);}
-  | ^(Assign ^(INDEX Identifier index=expr) value=expr)
+  | ^(Assign ^(INDEX id=Identifier index=expr) value=expr)
+  | ^(Assign id=Identifier Plus value=expr) {$node = new PlusAssignNode($id.text, $value.node, currentScope);}
+  | ^(Assign id=Identifier Minus value=expr) {$node = new MinusAssignNode($id.text, $value.node, currentScope);}
+  | ^(Assign id=Identifier Multiply value=expr) {$node = new MultiplyAssignNode($id.text, $value.node, currentScope);}
+  | ^(Assign id=Identifier Divide value=expr) {$node = new DivideAssignNode($id.text, $value.node, currentScope);}
+  | ^(Assign id=Identifier Mod value=expr) {$node = new ModAssignNode($id.text, $value.node, currentScope);}
   ;
   
 ifstatement returns [DNode node]
@@ -253,4 +258,6 @@ expr returns [DNode node]
   | ^(GENERATOR Identifier a=expr b=expr)
   | ^(GENERATOR ^(ROW Identifier a=expr) ^(COLUMN Identifier b=expr) c=expr)  
   | ^(INDEX vector=expr index=expr)
+  | ^(Increment a=expr)
+  | ^(Decrement a=expr)
   ;

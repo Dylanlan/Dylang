@@ -114,6 +114,7 @@ returnStatement
 assignment
   : Identifier Assign expr SemiColon -> ^(Assign Identifier expr)
   | Identifier index Assign expr SemiColon -> ^(Assign ^(INDEX Identifier index) expr)
+  | Identifier (Plus|Minus|Multiply|Divide|Mod) Assign^ expr SemiColon!
   ;
   
 ifstatement
@@ -208,7 +209,13 @@ unaryExpr
   ;
   
 rangeExpr
-  : indexExpr (Range^ indexExpr)? 
+  : incrExpr (Range^ incrExpr)? 
+  ;
+  
+incrExpr
+  : indexExpr Increment -> ^(Increment indexExpr)
+  | indexExpr Decrement -> ^(Decrement indexExpr)
+  | indexExpr
   ;
   
 indexExpr
@@ -327,7 +334,9 @@ LBComment : '/*';
 RBComment : '*/';
 LArrow    : '<-';
 RArrow    : '->';
+Increment : '++';
 Plus      : '+';
+Decrement : '--';
 Minus     : '-';
 Product   : '**';
 Multiply  : '*';
