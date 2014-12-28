@@ -21,7 +21,7 @@ public class PlusAssignNode implements DNode {
 		VariableSymbol vs = (VariableSymbol)scope.resolve(this.name);
 		
 		if (vs != null) {
-			AddNode result = new AddNode(new AtomNode(vs.getValue()), this.value);
+			BinaryOperationNode result = new BinaryOperationNode(new AtomNode(vs.getValue()), this.value, BinaryOperationNode.BON_ADD);
 			vs.setValue(result.evaluate());
 		}
 		else {

@@ -21,7 +21,7 @@ public class ModAssignNode implements DNode {
 		VariableSymbol vs = (VariableSymbol)scope.resolve(this.name);
 		
 		if (vs != null) {
-			ModNode result = new ModNode(new AtomNode(vs.getValue()), this.value);
+			BinaryOperationNode result = new BinaryOperationNode(new AtomNode(vs.getValue()), this.value, BinaryOperationNode.BON_MOD);
 			vs.setValue(result.evaluate());
 		}
 		else {

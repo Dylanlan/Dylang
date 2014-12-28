@@ -220,21 +220,21 @@ expr returns [DNode node]
 @init {
 	List<DValue> vecResult = new ArrayList<DValue>();
 }
-  : ^(Plus a=expr b=expr) {$node = new AddNode($a.node, $b.node);}
-  | ^(Minus a=expr b=expr) {$node = new SubtractNode($a.node, $b.node);}
-  | ^(Multiply a=expr b=expr) {$node = new MultiplyNode($a.node, $b.node);}
-  | ^(Divide a=expr b=expr) {$node = new DivideNode($a.node, $b.node);}
-  | ^(Mod a=expr b=expr) {$node = new ModNode($a.node, $b.node);}
-  | ^(Exponent a=expr b=expr) {$node = new ExponentNode($a.node, $b.node);}
-  | ^(Equals a=expr b=expr) {$node = new EqualsNode($a.node, $b.node);}
-  | ^(NEquals a=expr b=expr) {$node = new NotEqualsNode($a.node, $b.node);}
-  | ^(GThan a=expr b=expr) {$node = new GreaterThanNode($a.node, $b.node);}
-  | ^(LThan a=expr b=expr) {$node = new LessThanNode($a.node, $b.node);}
-  | ^(GThanE a=expr b=expr) {$node = new GreaterThanEqualNode($a.node, $b.node);}
-  | ^(LThanE a=expr b=expr) {$node = new LessThanEqualNode($a.node, $b.node);}
-  | ^(Or a=expr b=expr) {$node = new OrNode($a.node, $b.node);}
-  | ^(Xor a=expr b=expr) {$node = new XorNode($a.node, $b.node);}
-  | ^(And a=expr b=expr) {$node = new AndNode($a.node, $b.node);}
+  : ^(Plus a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_ADD);}
+  | ^(Minus a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_SUB);}
+  | ^(Multiply a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_MUL);}
+  | ^(Divide a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_DIV);}
+  | ^(Mod a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_MOD);}
+  | ^(Exponent a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_POW);}
+  | ^(Equals a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_EQUAL);}
+  | ^(NEquals a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_NEQUAL);}
+  | ^(GThan a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_GREATER);}
+  | ^(LThan a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_LESS);}
+  | ^(GThanE a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_GREATER_E);}
+  | ^(LThanE a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_LESS_E);}
+  | ^(Or a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_OR);}
+  | ^(Xor a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_XOR);}
+  | ^(And a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_AND);}
   | ^(Not a=expr) {$node = new NotNode($a.node);}
   | ^(By expr expr)
   | ^(CALL Identifier ^(ARGLIST expr*))

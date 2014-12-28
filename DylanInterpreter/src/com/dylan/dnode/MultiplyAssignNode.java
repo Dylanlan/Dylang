@@ -21,7 +21,7 @@ public class MultiplyAssignNode implements DNode {
 		VariableSymbol vs = (VariableSymbol)scope.resolve(this.name);
 		
 		if (vs != null) {
-			MultiplyNode result = new MultiplyNode(new AtomNode(vs.getValue()), this.value);
+			BinaryOperationNode result = new BinaryOperationNode(new AtomNode(vs.getValue()), this.value, BinaryOperationNode.BON_MUL);
 			vs.setValue(result.evaluate());
 		}
 		else {
