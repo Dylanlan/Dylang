@@ -14,7 +14,7 @@ public class PrintNode implements DNode{
 	}
 
 	@Override  
-	public DValue evaluate() {  
+	public DValue evaluate() {
 		DValue value = this.expression.evaluate();
 		int argument = 0;
 		if (this.arg != null) {

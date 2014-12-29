@@ -19,8 +19,8 @@ public class BlockNode implements DNode {
 	public DValue evaluate() {
 		for(DNode stat : statements) {
 			DValue value = stat.evaluate();  
-			if(!value.isNull()) {  
-				// only a return statement should have a return value  
+			if(stat instanceof ReturnNode) {  
+				// if we encountered a return node, return its value
 				return value;  
 			}  
 		}  

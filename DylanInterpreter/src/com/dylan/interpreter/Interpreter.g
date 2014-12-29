@@ -68,6 +68,7 @@ statement returns [DNode node]
   | returnStatement {$node = $returnStatement.node;}
   | Break
   | Continue
+  | expr {$node = $expr.node;}
   ;
 
 print returns [DNode node]
@@ -154,8 +155,8 @@ callStatement returns [DNode node]
   ;
   
 returnStatement returns [DNode node]
-  : ^(Return expr) {$node = $expr.node;}
-  | Return {$node = new EmptyNode();}
+  : ^(Return expr) {$node = new ReturnNode($expr.node);}
+  | Return {$node = new ReturnNode();}
   ;
   
 assignment returns [DNode node]

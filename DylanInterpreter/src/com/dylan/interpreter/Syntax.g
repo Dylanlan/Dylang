@@ -66,6 +66,7 @@ statement
   | returnStatement
   | Break SemiColon!
   | Continue SemiColon!
+  | expr SemiColon!
   ;
   
 length
