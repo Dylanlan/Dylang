@@ -235,7 +235,7 @@ expr returns [DNode node]
   | ^(Or a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_OR);}
   | ^(Xor a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_XOR);}
   | ^(And a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_AND);}
-  | ^(Not a=expr) {$node = new NotNode($a.node);}
+  | ^(Not a=expr) {$node = new UnaryOperationNode($a.node, UnaryOperationNode.UON_NOT);}
   | ^(By expr expr)
   | ^(CALL Identifier ^(ARGLIST expr*))
   | ^(As t=type e=expr)
@@ -248,7 +248,7 @@ expr returns [DNode node]
   | Char {$node = new AtomNode(new DValue(new Character(Helper.getCharacter($Char.text))));}
   | ^(TUPLEEX expr)
   | ^(Dot Identifier)
-  | ^(NEG a=expr) {$node = new NegativeNode($a.node);}
+  | ^(NEG a=expr) {$node = new UnaryOperationNode($a.node, UnaryOperationNode.UON_NEG);}
   | ^(POS a=expr) {$node = $a.node;}
   | length
   | reverse
@@ -258,6 +258,8 @@ expr returns [DNode node]
   | ^(GENERATOR Identifier a=expr b=expr)
   | ^(GENERATOR ^(ROW Identifier a=expr) ^(COLUMN Identifier b=expr) c=expr)  
   | ^(INDEX vector=expr index=expr)
-  | ^(Increment a=expr)
-  | ^(Decrement a=expr)
+  | ^(PREINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_PRE_INCR);}
+  | ^(PREDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_PRE_DECR);}
+  | ^(POSTINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_POST_INCR);}
+  | ^(POSTDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_POST_DECR);}
   ;

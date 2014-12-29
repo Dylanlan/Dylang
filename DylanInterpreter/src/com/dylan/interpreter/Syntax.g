@@ -24,6 +24,10 @@ tokens {
   COLUMN;
   INDEX;
   SIZE;
+  PREINCREMENT;
+  POSTINCREMENT;
+  PREDECREMENT;
+  POSTDECREMENT;
 }
 
 @header
@@ -213,8 +217,10 @@ rangeExpr
   ;
   
 incrExpr
-  : indexExpr Increment -> ^(Increment indexExpr)
-  | indexExpr Decrement -> ^(Decrement indexExpr)
+  : indexExpr Increment -> ^(POSTINCREMENT indexExpr)
+  | indexExpr Decrement -> ^(POSTDECREMENT indexExpr)
+  | Increment indexExpr -> ^(PREINCREMENT indexExpr)
+  | Decrement indexExpr -> ^(PREDECREMENT indexExpr)
   | indexExpr
   ;
   
