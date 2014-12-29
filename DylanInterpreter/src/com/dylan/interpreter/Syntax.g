@@ -129,6 +129,7 @@ ifstatement
 loopstatement
   : While expr slist -> ^(While expr slist)
   | Do slist While expr -> ^(Do slist ^(While expr))
+  | Loop expr slist -> ^(Loop expr slist)
   ;
   
 slist
@@ -309,6 +310,7 @@ If        : 'if';
 Else      : 'else';
 While     : 'while';
 Do				: 'do';
+Loop      : 'loop';
 Break     : 'break';
 Continue  : 'continue';
 Return    : 'return';
