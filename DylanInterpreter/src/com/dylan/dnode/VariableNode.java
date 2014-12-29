@@ -24,4 +24,9 @@ public class VariableNode implements DNode {
 
 		return new DValue();
 	}
+	
+	@Override  
+	public String toString() {  
+		return String.format("(" + this.name + ")");  
+	}
 }

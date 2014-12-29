@@ -93,7 +93,7 @@ public class DValue {
 	}
 	
 	public boolean isString() {
-		return this.isVector() && this.vectorType.equals("char");
+		return this.isVector() && (this.vectorType.equals("character") || this.vectorType.equals("char"));
 	}
 	
 	public boolean isVector() {

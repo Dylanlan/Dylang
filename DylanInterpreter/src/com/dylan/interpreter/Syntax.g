@@ -166,11 +166,7 @@ specifier
   ;
 
 expr
-  : concatExpr
-  ;
-  
-concatExpr
-  : (x=xorExpr -> $x) ((Concat) y=concatExpr -> ^(Concat $x $y))*
+  : xorExpr
   ;
   
 xorExpr
@@ -260,7 +256,7 @@ atom
           i++;
           } 
           else 
-          toVConst.addChild((CommonTree) adaptor.create(Char, tokens[i]));
+          toVConst.addChild((CommonTree) adaptor.create(Char, '\'' + tokens[i] + '\''));
        }
     }
   }
@@ -300,14 +296,12 @@ Var       : 'var';
 Const     : 'const';
 Matrix    : 'matrix';
 Vector    : 'vector';
-Interval  : 'interval';
-Integer   : 'integer';
-Boolean   : 'boolean';
+Integer   : 'integer' | 'int';
+Boolean   : 'boolean' | 'bool';
 True      : 'true';
 False     : 'false';
-Float      : 'float';
+Float     : 'float' | 'real';
 String    : 'string';
-Procedure : 'procedure';
 Function  : 'function';
 Returns   : 'returns';
 Typedef   : 'typedef';
@@ -319,9 +313,9 @@ Break     : 'break';
 Continue  : 'continue';
 Return    : 'return';
 Filter    : 'filter';
-Not       : 'not';
-And       : 'and';
-Or        : 'or';
+Not       : 'not' || '!';
+And       : 'and' || '&&';
+Or        : 'or' || '||';
 Xor       : 'xor';
 Rows      : 'rows';
 Columns   : 'columns';
@@ -331,8 +325,8 @@ Stream    : 'stream_state';
 Reverse   : 'reverse';
 Call      : 'call';
 Print 		: 'print';
-Null      : 'null';
-Character : 'character';
+Null      : 'null' || 'NULL';
+Character : 'character' || 'char';
 
 
 Comment   : '//';
@@ -365,7 +359,6 @@ Assign    : '=';
 SemiColon : ';';
 Comma     : ',';
 Range     : '..';
-Concat    : '||';
 Bar       : '|';
 
 fragment Dot       
