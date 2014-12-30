@@ -8,15 +8,13 @@ import com.dylan.symbolTable.VariableSymbol;
 
 public class VariableNode implements DNode {
 	private String name;
-	private Scope scope;
 	
-	public VariableNode(String name, Scope scope) {
+	public VariableNode(String name) {
 		this.name = name;
-		this.scope = scope;
 	}
 	
-	public DValue evaluate() {
-		VariableSymbol vs = (VariableSymbol)scope.resolve(this.name);
+	public DValue evaluate(Scope currentScope) {
+		VariableSymbol vs = (VariableSymbol)currentScope.resolve(this.name);
 		
 		if (vs != null) {
 			return vs.getValue();

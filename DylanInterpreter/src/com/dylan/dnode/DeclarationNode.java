@@ -9,17 +9,16 @@ import com.dylan.symbolTable.VariableSymbol;
 public class DeclarationNode implements DNode {
 	private String name;
 	private DNode value;
-	private Scope scope;
 	
-	public DeclarationNode(String name, DNode value, Scope scope) {
+	public DeclarationNode(String name, DNode value) {
 		this.name = name;
 		this.value = value;
-		this.scope = scope;
 	}
 	
-	public DValue evaluate() {
-		DValue result = this.value.evaluate();
-		VariableSymbol vs = (VariableSymbol)this.scope.symbols.get(this.name);
+	@Override
+	public DValue evaluate(Scope currentScope) {
+		DValue result = this.value.evaluate(currentScope);
+		VariableSymbol vs = (VariableSymbol)currentScope.symbols.get(this.name);
 		if (vs != null) {
 			throw new RuntimeException("Variable " + this.name + " already exists in this scope");
 		}
@@ -33,7 +32,7 @@ public class DeclarationNode implements DNode {
 			}
 			vs = new VariableSymbol(this.name, type);
 			vs.setValue(result);
-			scope.define(vs);
+			currentScope.define(vs);
 		}
 		
 		return new DValue();

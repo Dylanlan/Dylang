@@ -16,7 +16,6 @@ import com.dylan.interpreter.Interpreter;
 public class FunctionSymbol extends Symbol {
 	private List<String> paramNames;
 	private CommonTree code;
-	private Scope scope;
 
 	//public FunctionSymbol(String name, TypeSymbol type, List<String> params)
 	
@@ -26,16 +25,17 @@ public class FunctionSymbol extends Symbol {
 		this.paramNames = this.toList(params);
 	}
 
-	public DValue invoke(List<DNode> params, Map<String, FunctionSymbol> functions) {  
+	public DValue invoke(List<DNode> params, Map<String, FunctionSymbol> functions, Scope currentScope) {  
 
 		if(params.size() != this.paramNames.size()) {  
 			throw new RuntimeException("illegal function call: " + this.paramNames.size() +  
 					" parameters expected for function `" + this.name + "`");  
 		}  
-
-		// Assign all expression parameters to this function's identifiers  
+		
+		Scope functionScope = new Scope("functionScope", currentScope.getGlobalScope());
+		// Assign all expression parameters to this function's identifiers 
 		for(int i = 0; i < paramNames.size(); i++) {
-			DValue value = params.get(i).evaluate();
+			DValue value = params.get(i).evaluate(currentScope);
 			TypeSymbol type;
 			if (value.isScalar()) {
 				type = new ScalarTypeSymbol(value.getType());
@@ -46,14 +46,14 @@ public class FunctionSymbol extends Symbol {
 			VariableSymbol var = new VariableSymbol(paramNames.get(i), type);
 			var.value = value;
 
-			scope.define(var); 
+			functionScope.define(var);
 		}  
 
 		try {  
 			// Create a tree walker to evaluate this function's code block  
 			CommonTreeNodeStream nodes = new CommonTreeNodeStream(this.code);  
-			Interpreter walker = new Interpreter(nodes, scope, functions);  
-			return walker.block().node.evaluate();  
+			Interpreter walker = new Interpreter(nodes, functionScope, functions);  
+			return walker.block().node.evaluate(functionScope);  
 		} catch (RecognitionException e) {  
 			// do not recover from this  
 			throw new RuntimeException("something went wrong, terminating", e);  

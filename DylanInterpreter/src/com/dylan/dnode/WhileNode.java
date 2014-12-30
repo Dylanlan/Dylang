@@ -1,6 +1,7 @@
 package com.dylan.dnode;
 
 import com.dylan.interpreter.Helper;
+import com.dylan.symbolTable.Scope;
 
 public class WhileNode implements DNode {
 	public static final int WHILE = 0;
@@ -18,26 +19,26 @@ public class WhileNode implements DNode {
 	}
 
 	@Override  
-	public DValue evaluate() {
+	public DValue evaluate(Scope currentScope) {
 		
 		if (this.loopType == LOOP) {
-			int loopNum = this.condition.evaluate().intResult;
+			int loopNum = this.condition.evaluate(currentScope).intResult;
 			while (loopNum > 0) {
-				this.block.evaluate();
+				this.block.evaluate(currentScope);
 				loopNum--;
 			}
 			return new DValue();
 		}
 		
 		if (this.loopType == DO_WHILE) {
-			this.block.evaluate();
+			this.block.evaluate(currentScope);
 		}
 		
-		boolean passed = Helper.passedCondition(this.condition.evaluate());
+		boolean passed = Helper.passedCondition(this.condition.evaluate(currentScope));
 		
 		while (passed) {
-			this.block.evaluate();
-			passed = Helper.passedCondition(this.condition.evaluate());
+			this.block.evaluate(currentScope);
+			passed = Helper.passedCondition(this.condition.evaluate(currentScope));
 		}
 
 		return new DValue();

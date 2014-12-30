@@ -9,17 +9,16 @@ import com.dylan.symbolTable.VariableSymbol;
 public class AssignmentNode implements DNode {
 	private String name;
 	private DNode value;
-	private Scope scope;
 	
-	public AssignmentNode(String name, DNode value, Scope scope) {
+	public AssignmentNode(String name, DNode value) {
 		this.name = name;
 		this.value = value;
-		this.scope = scope;
 	}
 	
-	public DValue evaluate() {
-		DValue result = this.value.evaluate();
-		VariableSymbol vs = (VariableSymbol)scope.resolve(this.name);
+	@Override
+	public DValue evaluate(Scope currentScope) {
+		DValue result = this.value.evaluate(currentScope);
+		VariableSymbol vs = (VariableSymbol)currentScope.resolve(this.name);
 		
 		if (vs != null) {
 			vs.setValue(result);
@@ -34,7 +33,7 @@ public class AssignmentNode implements DNode {
 			}
 			vs = new VariableSymbol(this.name, type);
 			vs.setValue(result);
-			scope.define(vs);
+			currentScope.define(vs);
 		}
 		
 		return new DValue();

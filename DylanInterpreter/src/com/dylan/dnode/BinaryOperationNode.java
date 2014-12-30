@@ -36,10 +36,10 @@ public class BinaryOperationNode implements DNode {
 	}  
 
 	@Override  
-	public DValue evaluate() {  
+	public DValue evaluate(Scope currentScope) {  
 		DValue result = null;
-		DValue a = lhs.evaluate();  
-		DValue b = rhs.evaluate();
+		DValue a = lhs.evaluate(currentScope);  
+		DValue b = rhs.evaluate(currentScope);
  
 		switch(this.operation) {
 		case BON_ADD:

@@ -1,6 +1,7 @@
 package com.dylan.dnode;
 
 import com.dylan.interpreter.Helper;
+import com.dylan.symbolTable.Scope;
 
 public class TernaryOperationNode implements DNode {
 	private DNode condition;
@@ -14,13 +15,13 @@ public class TernaryOperationNode implements DNode {
 	}
 	
 	@Override
-	public DValue evaluate() {
-		DValue eval = this.condition.evaluate();
+	public DValue evaluate(Scope currentScope) {
+		DValue eval = this.condition.evaluate(currentScope);
 		if (Helper.passedCondition(eval)) {
-			return this.passed.evaluate();
+			return this.passed.evaluate(currentScope);
 		}
 		else {
-			return this.failed.evaluate();
+			return this.failed.evaluate(currentScope);
 		}
 	}
 

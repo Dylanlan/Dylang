@@ -9,20 +9,19 @@ import com.dylan.symbolTable.VariableSymbol;
 public class DivideAssignNode implements DNode {
 	private String name;
 	private DNode value;
-	private Scope scope;
 	
-	public DivideAssignNode(String name, DNode value, Scope scope) {
+	public DivideAssignNode(String name, DNode value) {
 		this.name = name;
 		this.value = value;
-		this.scope = scope;
 	}
 	
-	public DValue evaluate() {
-		VariableSymbol vs = (VariableSymbol)scope.resolve(this.name);
+	@Override
+	public DValue evaluate(Scope currentScope) {
+		VariableSymbol vs = (VariableSymbol)currentScope.resolve(this.name);
 		
 		if (vs != null) {
 			BinaryOperationNode result = new BinaryOperationNode(new AtomNode(vs.getValue()), this.value, BinaryOperationNode.BON_DIV);
-			vs.setValue(result.evaluate());
+			vs.setValue(result.evaluate(currentScope));
 		}
 		else {
 			throw new RuntimeException("Assigning to undefined variable: " + this.name);

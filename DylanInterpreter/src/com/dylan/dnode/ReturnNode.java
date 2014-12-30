@@ -1,5 +1,7 @@
 package com.dylan.dnode;
 
+import com.dylan.symbolTable.Scope;
+
 public class ReturnNode implements DNode{
 	private DNode expression = null;
 
@@ -12,9 +14,9 @@ public class ReturnNode implements DNode{
 	}
 
 	@Override  
-	public DValue evaluate() {
+	public DValue evaluate(Scope currentScope) {
 		if (this.expression != null) {
-			return this.expression.evaluate();
+			return this.expression.evaluate(currentScope);
 		}
 		else {
 			return new DValue();

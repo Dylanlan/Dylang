@@ -18,6 +18,14 @@ public class Scope {
 	public Scope getEnclosingScope() { return enclosingScope; }
 
 	public void define(Symbol sym) { symbols.put(sym.name, sym); }
+	
+	public Scope getGlobalScope() {
+		Scope global = this;
+		while(global.getEnclosingScope() != null) {
+			global = global.getEnclosingScope();
+		}
+		return global;
+	}
 
 	public Symbol resolve(String name) {
 		Symbol sym = symbols.get(name);

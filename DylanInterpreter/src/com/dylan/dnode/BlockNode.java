@@ -3,6 +3,8 @@ package com.dylan.dnode;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.dylan.symbolTable.Scope;
+
 //TODO: block node should push and pop scopes? to handle var declaration in loop??
 public class BlockNode implements DNode {
 	private List<DNode> statements;  
@@ -16,9 +18,9 @@ public class BlockNode implements DNode {
 	}  
 
 	@Override  
-	public DValue evaluate() {
+	public DValue evaluate(Scope currentScope) {
 		for(DNode stat : statements) {
-			DValue value = stat.evaluate();  
+			DValue value = stat.evaluate(currentScope);  
 			if(stat instanceof ReturnNode) {  
 				// if we encountered a return node, return its value
 				return value;  

@@ -18,6 +18,7 @@ import org.antlr.stringtemplate.StringTemplateGroup;
 
 import com.dylan.dnode.*;
 import com.dylan.symbolTable.FunctionSymbol;
+import com.dylan.symbolTable.SymbolTable;
 
 public class Main {
 	public static void main(String[] args) throws RecognitionException {
@@ -38,7 +39,7 @@ public class Main {
 		}
 
 		//try {
-        		//SymbolTable symtab = new SymbolTable();
+        		SymbolTable symTab = new SymbolTable();
         		SyntaxLexer lexer = new SyntaxLexer(input);
         		TokenStream tokenStream = new CommonTokenStream(lexer);
         		SyntaxParser parser = new SyntaxParser(tokenStream);
@@ -46,7 +47,7 @@ public class Main {
         		CommonTree ast = (CommonTree)entry.getTree();
         		DOTTreeGenerator gen = new DOTTreeGenerator();
         		StringTemplate st = gen.toDOT(ast);
-        		//System.out.println(st);
+        		System.out.println(st);
         			
         		CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
         		nodes.setTokenStream(tokenStream);
@@ -57,9 +58,9 @@ public class Main {
         		HashMap<String, FunctionSymbol> functions = new HashMap<String, FunctionSymbol>();
         		Interpreter interpret = new Interpreter(nodes, functions);
         		DNode node = interpret.program().node;
-        		node.evaluate();
+        		node.evaluate(symTab.globals);
         		if (functions.containsKey("main")) {
-        			functions.get("main").invoke(new ArrayList<DNode>(), functions);
+        			functions.get("main").invoke(new ArrayList<DNode>(), functions, symTab.globals);
         		}
 		//}
 		//catch (RuntimeException e) {

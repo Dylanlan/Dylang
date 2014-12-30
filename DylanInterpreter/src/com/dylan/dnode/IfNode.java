@@ -1,6 +1,7 @@
 package com.dylan.dnode;
 
 import com.dylan.interpreter.Helper;
+import com.dylan.symbolTable.Scope;
 
 public class IfNode implements DNode {
 	private DNode condition = null;
@@ -19,14 +20,14 @@ public class IfNode implements DNode {
 	}
 
 	@Override  
-	public DValue evaluate() {  
-		DValue cond = this.condition.evaluate();
+	public DValue evaluate(Scope currentScope) {  
+		DValue cond = this.condition.evaluate(currentScope);
 		
 		if (Helper.passedCondition(cond)) {
-			return this.ifBlock.evaluate();
+			return this.ifBlock.evaluate(currentScope);
 		}
 		else if (this.elseBlock != null) {
-			return this.elseBlock.evaluate();
+			return this.elseBlock.evaluate(currentScope);
 		}
 
 		return new DValue();

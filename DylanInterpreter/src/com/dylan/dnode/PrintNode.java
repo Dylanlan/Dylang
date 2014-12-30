@@ -1,5 +1,7 @@
 package com.dylan.dnode;
 
+import com.dylan.symbolTable.Scope;
+
 public class PrintNode implements DNode{
 	private DNode expression; 
 	private DNode arg = null;
@@ -14,11 +16,11 @@ public class PrintNode implements DNode{
 	}
 
 	@Override  
-	public DValue evaluate() {
-		DValue value = this.expression.evaluate();
+	public DValue evaluate(Scope currentScope) {
+		DValue value = this.expression.evaluate(currentScope);
 		int argument = 0;
 		if (this.arg != null) {
-			DValue argValue = this.arg.evaluate();
+			DValue argValue = this.arg.evaluate(currentScope);
 			argument = argValue.intResult;
 		}
 		value.print(argument);  

@@ -19,7 +19,7 @@ options {
 @members
 {
 	SymbolTable symTab = new SymbolTable();
-	Scope currentScope = null;
+	//Scope currentScope = null;
 	Map<String, FunctionSymbol> functions = null;
 	String intType = "int";
 	String floatType = "float";
@@ -28,13 +28,11 @@ options {
   
   public Interpreter(CommonTreeNodeStream nodes, Map<String, FunctionSymbol> fns) {
     this(nodes);
-    currentScope = this.symTab.globals;
     functions = fns;
   }
   
   public Interpreter(CommonTreeNodeStream nds, Scope sc, Map<String, FunctionSymbol> fns) {
     this(nds);
-    currentScope = sc;
     functions = fns;
   }
 	
@@ -90,7 +88,7 @@ declaration returns [DNode node]
 	DValue result = null;
 }
 	: ^(DECL s=specifier? t=type id=Identifier)
-	| ^(DECL s=specifier? t=type ^(Assign id=Identifier value=expr)) {$node = new DeclarationNode($id.text, $value.node, currentScope);}
+	| ^(DECL s=specifier? t=type ^(Assign id=Identifier value=expr)) {$node = new DeclarationNode($id.text, $value.node);}
 	;
 
 block returns [DNode node]
@@ -98,10 +96,7 @@ block returns [DNode node]
   BlockNode bn = new BlockNode(); 
   $node = bn;
 }  
-@after { 
-  currentScope = currentScope.getEnclosingScope(); 
-}
-  : ^(BLOCK {	currentScope = new Scope("blockscope", currentScope);} (statement  {bn.addStatement($statement.node);})*)
+  : ^(BLOCK (statement  {bn.addStatement($statement.node);})*)
   ;
   
 function returns [DNode node]
@@ -118,35 +113,16 @@ function returns [DNode node]
 	}
 	
 	FunctionSymbol fs = new FunctionSymbol($id.text, type, $p.tree, $b.tree);
-	symTab.defineFunction(fs);
 	functions.put($id.text, fs);
-	currentScope = currentScope.getEnclosingScope();
 }
   : ^(Function id=Identifier p=paramlist ^(Returns t=type?) b=block)
   ;
   
 paramlist returns [DNode node]
-  : ^(PARAMLIST {	currentScope = new Scope("paramscope", currentScope);} p+=parameter*)
+  : ^(PARAMLIST p+=parameter*)
   ;
   
 parameter returns [DNode node]
-@init {
-	VariableSymbol vs = null;
-	String paramType = null;
-}
-@after {
-	Symbol spec;
-	if ($s.text == null) {
-  	spec = new Symbol("const");
-  }
-  else {
-  	spec = new Symbol($s.text);
-  }
-  
-  vs = new VariableSymbol($id.text, $t.type, spec);
-  
-  currentScope.define(vs);
-}
   : ^(id=Identifier s=specifier? t=type)
   ;
   
@@ -160,18 +136,13 @@ returnStatement returns [DNode node]
   ;
   
 assignment returns [DNode node]
-@init {
-	VariableSymbol vs = null;
-	TypeSymbol variableType = null;
-	TypeSymbol scalarType = null;
-}
-  : ^(Assign id=Identifier value=expr) {$node = new AssignmentNode($id.text, $value.node, currentScope);}
+  : ^(Assign id=Identifier value=expr) {$node = new AssignmentNode($id.text, $value.node);}
   | ^(Assign ^(INDEX id=Identifier index=expr) value=expr)
-  | ^(Assign id=Identifier Plus value=expr) {$node = new PlusAssignNode($id.text, $value.node, currentScope);}
-  | ^(Assign id=Identifier Minus value=expr) {$node = new MinusAssignNode($id.text, $value.node, currentScope);}
-  | ^(Assign id=Identifier Multiply value=expr) {$node = new MultiplyAssignNode($id.text, $value.node, currentScope);}
-  | ^(Assign id=Identifier Divide value=expr) {$node = new DivideAssignNode($id.text, $value.node, currentScope);}
-  | ^(Assign id=Identifier Mod value=expr) {$node = new ModAssignNode($id.text, $value.node, currentScope);}
+  | ^(Assign id=Identifier Plus value=expr) {$node = new PlusAssignNode($id.text, $value.node);}
+  | ^(Assign id=Identifier Minus value=expr) {$node = new MinusAssignNode($id.text, $value.node);}
+  | ^(Assign id=Identifier Multiply value=expr) {$node = new MultiplyAssignNode($id.text, $value.node);}
+  | ^(Assign id=Identifier Divide value=expr) {$node = new DivideAssignNode($id.text, $value.node);}
+  | ^(Assign id=Identifier Mod value=expr) {$node = new ModAssignNode($id.text, $value.node);}
   ;
   
 ifstatement returns [DNode node]
@@ -220,7 +191,7 @@ specifier
 
 expr returns [DNode node]
 @init {
-	List<DValue> vecResult = new ArrayList<DValue>();
+	List<DNode> nodeList = new ArrayList<DNode>();
 }
   : ^(Plus a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_ADD);}
   | ^(Minus a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_SUB);}
@@ -239,9 +210,9 @@ expr returns [DNode node]
   | ^(And a=expr b=expr) {$node = new BinaryOperationNode($a.node, $b.node, BinaryOperationNode.BON_AND);}
   | ^(Not a=expr) {$node = new UnaryOperationNode($a.node, UnaryOperationNode.UON_NOT);}
   | ^(By expr expr)
-  | ^(CALL Identifier ^(ARGLIST expr*))
+  | ^(CALL id=Identifier ^(ARGLIST (a=expr {nodeList.add($a.node);})*)) {$node = new FunctionNode($id.text, nodeList, functions);}
   | ^(As t=type e=expr)
-  | Identifier {$node = new VariableNode($Identifier.text, currentScope);}
+  | Identifier {$node = new VariableNode($Identifier.text);}
   | Number {$node = new AtomNode(new DValue(new Integer($Number.text)));}
   | FPNumber {$node = new AtomNode(new DValue(new Float($FPNumber.text)));}
   | True {$node = new AtomNode(new DValue(new Boolean(true)));}
@@ -254,15 +225,15 @@ expr returns [DNode node]
   | ^(POS a=expr) {$node = $a.node;}
   | length
   | reverse
-  | ^(VCONST (a=expr {vecResult.add($a.node.evaluate());})+) {$node = new AtomNode(new DValue(vecResult, vecResult.get(0).getType()));}
+  | ^(VCONST (a=expr {nodeList.add($a.node);})+) {$node = new AtomNode(nodeList);}
   | ^(Range a=expr b=expr)
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR Identifier a=expr b=expr)
   | ^(GENERATOR ^(ROW Identifier a=expr) ^(COLUMN Identifier b=expr) c=expr)  
   | ^(INDEX vector=expr index=expr)
-  | ^(PREINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_PRE_INCR);}
-  | ^(PREDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_PRE_DECR);}
-  | ^(POSTINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_POST_INCR);}
-  | ^(POSTDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_POST_DECR);}
+  | ^(PREINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_PRE_INCR);}
+  | ^(PREDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_PRE_DECR);}
+  | ^(POSTINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_POST_INCR);}
+  | ^(POSTDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_POST_DECR);}
   | ^(TERNARY a=expr b=expr c=expr) {$node = new TernaryOperationNode($a.node, $b.node, $c.node);}
   ;

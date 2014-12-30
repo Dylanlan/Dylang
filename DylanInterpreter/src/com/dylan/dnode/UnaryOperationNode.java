@@ -12,7 +12,6 @@ public class UnaryOperationNode implements DNode{
 	
 	private DNode expr;
 	private int operation;
-	private Scope scope;
 	private String operator;
 	private String name;
 	
@@ -22,18 +21,17 @@ public class UnaryOperationNode implements DNode{
 		this.setOperator();
 	}
 	
-	public UnaryOperationNode(String name, Scope scope, int operation) {
-		this.expr = new VariableNode(name, scope);
+	public UnaryOperationNode(String name, int operation) {
+		this.expr = new VariableNode(name);
 		this.operation = operation;
 		this.setOperator();
 		this.name = name;
-		this.scope = scope;
 	}
 	
 	@Override  
-	public DValue evaluate() {  
+	public DValue evaluate(Scope currentScope) {  
 		DValue result = null;
-		DValue a = expr.evaluate();
+		DValue a = expr.evaluate(currentScope);
  
 		switch(this.operation) {
 		case UON_NEG:
@@ -43,16 +41,16 @@ public class UnaryOperationNode implements DNode{
 			result = this.not(a);
 			break;
 		case UON_PRE_INCR:
-			result = this.preIncrement(a);
+			result = this.preIncrement(a, currentScope);
 			break;
 		case UON_PRE_DECR:
-			result = this.preDecrement(a);
+			result = this.preDecrement(a, currentScope);
 			break;
 		case UON_POST_INCR:
-			result = this.postIncrement(a);
+			result = this.postIncrement(a, currentScope);
 			break;
 		case UON_POST_DECR:
-			result = this.postDecrement(a);
+			result = this.postDecrement(a, currentScope);
 			break;
 		default:
 			result = new DValue();
@@ -82,33 +80,33 @@ public class UnaryOperationNode implements DNode{
 		throw new RuntimeException("illegal expression: " + this);
 	}
 	
-	private DValue preIncrement(DValue a) {
+	private DValue preIncrement(DValue a, Scope currentScope) {
 		BinaryOperationNode node = new BinaryOperationNode(new AtomNode(a), new AtomNode(new DValue(1)), BinaryOperationNode.BON_ADD);
-		DValue result = node.evaluate();
-		AssignmentNode assign = new AssignmentNode(this.name, node, this.scope);
-		assign.evaluate();
+		DValue result = node.evaluate(currentScope);
+		AssignmentNode assign = new AssignmentNode(this.name, node);
+		assign.evaluate(currentScope);
 		return result;
 	}
 	
-	private DValue preDecrement(DValue a) {
+	private DValue preDecrement(DValue a, Scope currentScope) {
 		BinaryOperationNode node = new BinaryOperationNode(new AtomNode(a), new AtomNode(new DValue(1)), BinaryOperationNode.BON_SUB);
-		DValue result = node.evaluate();
-		AssignmentNode assign = new AssignmentNode(this.name, node, this.scope);
-		assign.evaluate();
+		DValue result = node.evaluate(currentScope);
+		AssignmentNode assign = new AssignmentNode(this.name, node);
+		assign.evaluate(currentScope);
 		return result;
 	}
 	
-	private DValue postIncrement(DValue a) {
+	private DValue postIncrement(DValue a, Scope currentScope) {
 		BinaryOperationNode node = new BinaryOperationNode(new AtomNode(a), new AtomNode(new DValue(1)), BinaryOperationNode.BON_ADD);
-		AssignmentNode assign = new AssignmentNode(this.name, node, this.scope);
-		assign.evaluate();
+		AssignmentNode assign = new AssignmentNode(this.name, node);
+		assign.evaluate(currentScope);
 		return a;
 	}
 	
-	private DValue postDecrement(DValue a) {
+	private DValue postDecrement(DValue a, Scope currentScope) {
 		BinaryOperationNode node = new BinaryOperationNode(new AtomNode(a), new AtomNode(new DValue(1)), BinaryOperationNode.BON_SUB);
-		AssignmentNode assign = new AssignmentNode(this.name, node, this.scope);
-		assign.evaluate();
+		AssignmentNode assign = new AssignmentNode(this.name, node);
+		assign.evaluate(currentScope);
 		return a;
 	}
 	

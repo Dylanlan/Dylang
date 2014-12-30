@@ -1,11 +1,14 @@
 package com.dylan.dnode;
 
+import com.dylan.symbolTable.Scope;
+
 public class EmptyNode implements DNode {
 	public EmptyNode() {
 		
 	}
 	
-	public DValue evaluate() {
+	@Override
+	public DValue evaluate(Scope currentScope) {
 		return new DValue();
 	}
 }
