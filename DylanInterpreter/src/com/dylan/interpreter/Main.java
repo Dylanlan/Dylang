@@ -19,7 +19,7 @@ import org.antlr.stringtemplate.StringTemplateGroup;
 import com.dylan.dnode.*;
 import com.dylan.symbolTable.FunctionSymbol;
 
-public class Tester {
+public class Main {
 	public static void main(String[] args) throws RecognitionException {
 		if (args.length != 1) {
 			System.err.print("Usage: Tester <dash_file>");
@@ -46,7 +46,7 @@ public class Tester {
         		CommonTree ast = (CommonTree)entry.getTree();
         		DOTTreeGenerator gen = new DOTTreeGenerator();
         		StringTemplate st = gen.toDOT(ast);
-        		System.out.println(st);
+        		//System.out.println(st);
         			
         		CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
         		nodes.setTokenStream(tokenStream);
