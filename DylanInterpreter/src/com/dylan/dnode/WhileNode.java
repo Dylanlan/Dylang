@@ -1,5 +1,7 @@
 package com.dylan.dnode;
 
+import com.dylan.interpreter.Helper;
+
 public class WhileNode implements DNode {
 	public static final int WHILE = 0;
 	public static final int DO_WHILE = 1;
@@ -31,29 +33,13 @@ public class WhileNode implements DNode {
 			this.block.evaluate();
 		}
 		
-		boolean passed = this.passedCondition(this.condition.evaluate());
+		boolean passed = Helper.passedCondition(this.condition.evaluate());
 		
 		while (passed) {
 			this.block.evaluate();
-			passed = this.passedCondition(this.condition.evaluate());
+			passed = Helper.passedCondition(this.condition.evaluate());
 		}
 
 		return new DValue();
-	}
-	
-	public boolean passedCondition(DValue cond) {
-		
-		if (cond.isBool() && cond.boolResult) {
-			return true;
-		}
-		else if (cond.isInt() && cond.intResult != 0) {
-			return true;
-		}
-		else if (cond.isFloat() && cond.floatResult != 0) {
-			return true;
-		}
-		else {
-			return false;
-		}
 	}
 }

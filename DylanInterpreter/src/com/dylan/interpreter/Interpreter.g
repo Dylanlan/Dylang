@@ -264,4 +264,5 @@ expr returns [DNode node]
   | ^(PREDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_PRE_DECR);}
   | ^(POSTINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_POST_INCR);}
   | ^(POSTDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, currentScope, UnaryOperationNode.UON_POST_DECR);}
+  | ^(TERNARY a=expr b=expr c=expr) {$node = new TernaryOperationNode($a.node, $b.node, $c.node);}
   ;

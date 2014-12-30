@@ -28,6 +28,7 @@ tokens {
   POSTINCREMENT;
   PREDECREMENT;
   POSTDECREMENT;
+  TERNARY;
 }
 
 @header
@@ -168,7 +169,12 @@ specifier
   ;
 
 expr
-  : xorExpr
+  : ternaryExpr
+  ;
+  
+ternaryExpr
+  : a=xorExpr Question b=xorExpr Colon c=xorExpr -> ^(TERNARY $a $b $c)
+  | xorExpr
   ;
   
 xorExpr
@@ -360,9 +366,11 @@ LBrace    : '{';
 RBrace    : '}';
 Assign    : '=';
 SemiColon : ';';
+Colon     : ':';
 Comma     : ',';
 Range     : '..';
 Bar       : '|';
+Question  : '?';
 
 fragment Dot       
   : '.'

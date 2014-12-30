@@ -1,5 +1,7 @@
 package com.dylan.interpreter;
 
+import com.dylan.dnode.DValue;
+
 public class Helper {
 
 	
@@ -52,5 +54,21 @@ public class Helper {
 			result = new Character(quoted.replaceAll("'", "").charAt(0));
 		}
 		return result;
+	}
+	
+	public static boolean passedCondition(DValue cond) {
+		
+		if (cond.isBool() && cond.boolResult) {
+			return true;
+		}
+		else if (cond.isInt() && cond.intResult != 0) {
+			return true;
+		}
+		else if (cond.isFloat() && cond.floatResult != 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }
