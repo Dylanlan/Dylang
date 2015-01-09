@@ -159,6 +159,7 @@ loopstatement returns [DNode node]
   | ^(Do block2=slist ^(While cond2=expr)) {$node = new WhileNode($cond2.node, $block2.node, WhileNode.DO_WHILE);}
   | ^(Loop num=expr exec=slist) {$node = new WhileNode($num.node, $exec.node, WhileNode.LOOP);}
   | ^(For (declaration {decls.add($declaration.node);})* cond=expr? (assignment {assigns.add($assignment.node);})* ^(BODY block3=slist)) {$node = new ForNode(decls, $cond.node, assigns, $block3.node);}
+  | ^(For type id=Identifier expr ^(BODY slist)) {$node = new ForNode($id.text, $expr.node, $slist.node);}
   ;
   
 slist returns [DNode node]

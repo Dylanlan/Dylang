@@ -27,8 +27,11 @@ public class DeclarationNode implements DNode {
 			if (result.isScalar()) {
 				type = new ScalarTypeSymbol(result.getType());
 			}
+			else if (result.isNull()) {
+				type = new ScalarTypeSymbol("null");
+			}
 			else {
-				throw new RuntimeException("Can't handle non-scalar assignment yet");
+				throw new RuntimeException("Can't handle non-scalar declaration for type: " + result.getType());
 			}
 			vs = new VariableSymbol(this.name, type);
 			vs.setValue(result);

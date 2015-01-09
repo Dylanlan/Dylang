@@ -29,7 +29,7 @@ public class AssignmentNode implements DNode {
 				type = new ScalarTypeSymbol(result.getType());
 			}
 			else {
-				throw new RuntimeException("Can't handle non-scalar assignment yet");
+				throw new RuntimeException("Can't handle non-scalar assignment for type: " + result.getType());
 			}
 			vs = new VariableSymbol(this.name, type);
 			vs.setValue(result);

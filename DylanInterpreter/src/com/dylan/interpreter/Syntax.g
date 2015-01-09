@@ -135,6 +135,7 @@ loopstatement
   | Loop expr slist -> ^(Loop expr slist)
   | For LParen declaration? (Comma declaration)* SemiColon expr? SemiColon
   	assignment? (Comma assignment)* RParen slist -> ^(For declaration* expr? assignment* ^(BODY slist))
+  | For LParen type Identifier (Colon|In) expr RParen slist -> ^(For type Identifier expr ^(BODY slist))
   ;
   
 slist
