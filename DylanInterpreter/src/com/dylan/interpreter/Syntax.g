@@ -29,6 +29,7 @@ tokens {
   PREDECREMENT;
   POSTDECREMENT;
   TERNARY;
+  BODY;
 }
 
 @header
@@ -57,8 +58,8 @@ globalStatement
   ;
   
 statement
-  : assignment
-  | declaration 
+  : assignment SemiColon!
+  | declaration SemiColon!
   | print
   | ifstatement
   | loopstatement
@@ -84,8 +85,8 @@ reverse
 	;
 
 declaration
-	: specifier? type? Identifier SemiColon -> ^(DECL specifier? type? Identifier)
-	| specifier? type? Identifier Assign expr SemiColon -> ^(DECL specifier? type? ^(Assign Identifier expr))
+	: specifier? type? Identifier Assign expr -> ^(DECL specifier? type? ^(Assign Identifier expr)) 
+	| specifier? type? Identifier -> ^(DECL specifier? type? Identifier)
 	;
   
 typedef
@@ -118,9 +119,9 @@ returnStatement
   ;
   
 assignment
-  : Identifier Assign expr SemiColon -> ^(Assign Identifier expr)
-  | Identifier index Assign expr SemiColon -> ^(Assign ^(INDEX Identifier index) expr)
-  | Identifier (Plus|Minus|Multiply|Divide|Mod) Assign^ expr SemiColon!
+  : Identifier Assign expr -> ^(Assign Identifier expr)
+  | Identifier index Assign expr -> ^(Assign ^(INDEX Identifier index) expr)
+  | Identifier (Plus|Minus|Multiply|Divide|Mod) Assign^ expr
   ;
   
 ifstatement
@@ -132,6 +133,8 @@ loopstatement
   : While expr slist -> ^(While expr slist)
   | Do slist While expr -> ^(Do slist ^(While expr))
   | Loop expr slist -> ^(Loop expr slist)
+  | For LParen declaration? (Comma declaration)* SemiColon expr? SemiColon
+  	assignment? (Comma assignment)* RParen slist -> ^(For declaration* expr? assignment* ^(BODY slist))
   ;
   
 slist
@@ -318,6 +321,7 @@ Else      : 'else';
 While     : 'while';
 Do				: 'do';
 Loop      : 'loop';
+For				: 'for';
 Break     : 'break';
 Continue  : 'continue';
 Return    : 'return';

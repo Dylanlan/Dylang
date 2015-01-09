@@ -47,7 +47,7 @@ public class Main {
         		CommonTree ast = (CommonTree)entry.getTree();
         		DOTTreeGenerator gen = new DOTTreeGenerator();
         		StringTemplate st = gen.toDOT(ast);
-        		System.out.println(st);
+        		//System.out.println(st);
         			
         		CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
         		nodes.setTokenStream(tokenStream);

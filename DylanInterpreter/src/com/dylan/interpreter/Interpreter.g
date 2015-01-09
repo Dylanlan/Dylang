@@ -151,9 +151,14 @@ ifstatement returns [DNode node]
   ;
   
 loopstatement returns [DNode node]
+@init {
+	List<DNode> decls = new ArrayList<DNode>();
+	List<DNode> assigns = new ArrayList<DNode>();
+}
   : ^(While cond1=expr block1=slist) {$node = new WhileNode($cond1.node, $block1.node, WhileNode.WHILE);}
   | ^(Do block2=slist ^(While cond2=expr)) {$node = new WhileNode($cond2.node, $block2.node, WhileNode.DO_WHILE);}
   | ^(Loop num=expr exec=slist) {$node = new WhileNode($num.node, $exec.node, WhileNode.LOOP);}
+  | ^(For (declaration {decls.add($declaration.node);})* cond=expr? (assignment {assigns.add($assignment.node);})* ^(BODY block3=slist)) {$node = new ForNode(decls, $cond.node, assigns, $block3.node);}
   ;
   
 slist returns [DNode node]
