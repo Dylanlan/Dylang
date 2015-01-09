@@ -232,7 +232,7 @@ expr returns [DNode node]
   | length
   | reverse
   | ^(VCONST (a=expr {nodeList.add($a.node);})+) {$node = new AtomNode(nodeList);}
-  | ^(Range a=expr b=expr)
+  | ^(Range a=expr b=expr) {$node = new RangeNode($a.node, $b.node);}
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR Identifier a=expr b=expr)
   | ^(GENERATOR ^(ROW Identifier a=expr) ^(COLUMN Identifier b=expr) c=expr)  
