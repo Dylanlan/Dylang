@@ -242,4 +242,5 @@ expr returns [DNode node]
   | ^(POSTINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_POST_INCR);}
   | ^(POSTDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_POST_DECR);}
   | ^(TERNARY a=expr b=expr c=expr) {$node = new TernaryOperationNode($a.node, $b.node, $c.node);}
+  | ^(Filter type id=Identifier vector=expr (cond=expr {nodeList.add($cond.node);})+) {$node = new FilterNode($id.text, $vector.node, nodeList);}   
   ;

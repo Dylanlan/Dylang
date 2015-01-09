@@ -291,8 +291,8 @@ vectorconst
   ;
 
 filter
-  : Filter LParen Identifier In vector=expr Bar condition=expr (Comma condition2+=expr)* RParen 
-    -> ^(Filter Identifier $vector $condition $condition2*)        
+  : Filter LParen type Identifier (Comma|In) vector=expr Bar cond=expr (Comma cond2+=expr)* RParen 
+    -> ^(Filter type Identifier $vector $cond $cond2*)        
   ;
   
 generator
