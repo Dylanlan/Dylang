@@ -291,14 +291,12 @@ vectorconst
   ;
 
 filter
-  : Filter LParen type Identifier (Comma|In) vector=expr Bar cond=expr (Comma cond2+=expr)* RParen 
+  : Filter LParen type Identifier (Colon|In) vector=expr Bar cond=expr (Comma cond2+=expr)* RParen 
     -> ^(Filter type Identifier $vector $cond $cond2*)        
   ;
   
 generator
-  : LBracket Identifier In vector=expr Bar apply=expr RBracket -> ^(GENERATOR Identifier $vector $apply)
-  | LBracket id1=Identifier In e1=expr Comma id2=Identifier In e2=expr Bar apply=expr RBracket 
-    -> ^(GENERATOR ^(ROW $id1 $e1) ^(COLUMN $id2 $e2) $apply)    
+  : LBracket type Identifier (Colon|In) vector=expr Bar apply=expr RBracket -> ^(GENERATOR type Identifier $vector $apply)
   ;
   
 In        : 'in';

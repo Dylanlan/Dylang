@@ -234,8 +234,7 @@ expr returns [DNode node]
   | ^(VCONST (a=expr {nodeList.add($a.node);})+) {$node = new AtomNode(nodeList);}
   | ^(Range a=expr b=expr) {$node = new RangeNode($a.node, $b.node);}
   | ^(Filter Identifier a=expr b=expr) 
-  | ^(GENERATOR Identifier a=expr b=expr)
-  | ^(GENERATOR ^(ROW Identifier a=expr) ^(COLUMN Identifier b=expr) c=expr)  
+  | ^(GENERATOR type id=Identifier a=expr b=expr) {$node = new GeneratorNode($id.text, $a.node, $b.node);}
   | ^(INDEX vector=expr index=expr)
   | ^(PREINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_PRE_INCR);}
   | ^(PREDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_PRE_DECR);}
