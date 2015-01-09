@@ -19,8 +19,11 @@ public class BlockNode implements DNode {
 
 	@Override  
 	public DValue evaluate(Scope currentScope) {
+		
+		Scope newScope = new Scope("block scope", currentScope);
+		
 		for(DNode stat : statements) {
-			DValue value = stat.evaluate(currentScope);  
+			DValue value = stat.evaluate(newScope);  
 			if(stat instanceof ReturnNode) {  
 				// if we encountered a return node, return its value
 				return value;  
