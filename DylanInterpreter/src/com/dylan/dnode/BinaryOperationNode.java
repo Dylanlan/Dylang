@@ -284,6 +284,10 @@ public class BinaryOperationNode implements DNode {
 		if (a.charResult != null && b.charResult != null) {
 			return new DValue(a.charResult.toString().equals(b.charResult.toString()));
 		}
+		
+		if (a.boolResult != null && b.boolResult != null) {
+			return new DValue(a.boolResult.booleanValue() == b.boolResult.booleanValue());
+		}
 		 
 		if(a.isString() || b.isString()) {  
 			return new DValue(a.toString().equals(b.toString()));  

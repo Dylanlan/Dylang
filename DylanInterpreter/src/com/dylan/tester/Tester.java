@@ -11,12 +11,24 @@ import java.util.List;
 public class Tester {
 	public static final String interpreter = "java -cp antlr-3.3-complete.jar;bin/ com.dylan.interpreter.Main";
 	public static final boolean debug = false;
+	public static String singleTestName = "";
 	
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
 
 		try {
-			Tester.test();
+			if (singleTestName.length() > 0) {
+				int result = Tester.compare(singleTestName);
+				if (result == 0) {
+					System.out.print(singleTestName + " - Ok\n");
+				}
+				else {
+					System.out.print(singleTestName + " - Failed\n");
+				}
+			}
+			else {
+				Tester.testAll();
+			}
 		}
 		catch(Exception e) {
 			System.out.println("There was a problem running the tests: " + e.getMessage());
@@ -26,7 +38,7 @@ public class Tester {
 		System.out.println("\nTesting duration: " + time + "ms");
 	}
 
-	private static void test() {
+	private static void testAll() {
 		List <String> testNames = new ArrayList<String>();
 		List <Integer> testResults = new ArrayList<Integer>();
 		int numFailed = 0;
