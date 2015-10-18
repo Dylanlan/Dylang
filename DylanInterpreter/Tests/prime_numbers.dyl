@@ -4,12 +4,12 @@ function main() returns integer {
 	integer isPrime = 1;
 	integer maxNum = 1000;
 
-	loop while (p < maxNum) {
+	while (p < maxNum) {
 	    i=1;
 	    isPrime=1;
 	    p=p+1;
 	
-	    loop while (i < p/2) {
+	    while (i < p/2) {
 	        i=i+1;
 	
 	        if ((p/i) * i == p) {
