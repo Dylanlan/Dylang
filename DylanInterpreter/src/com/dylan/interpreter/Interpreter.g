@@ -75,11 +75,11 @@ print returns [DNode node]
   ;
   
 length returns [DNode node]
-	: ^(Length expr)
+	: ^(Length expr) {$node = new BuiltInFunctionNode($expr.node, BuiltInFunctionNode.BIF_LENGTH);}
 	;
 	
 reverse returns [DNode node]
-	: ^(Reverse expr)
+	: ^(Reverse expr) {$node = new BuiltInFunctionNode($expr.node, BuiltInFunctionNode.BIF_REVERSE);}
 	;
 
 declaration returns [DNode node]
@@ -229,8 +229,8 @@ expr returns [DNode node]
   | ^(Dot Identifier)
   | ^(NEG a=expr) {$node = new UnaryOperationNode($a.node, UnaryOperationNode.UON_NEG);}
   | ^(POS a=expr) {$node = $a.node;}
-  | length
-  | reverse
+  | length {$node = $length.node;}
+  | reverse {$node = $reverse.node;}
   | ^(VCONST (a=expr {nodeList.add($a.node);})+) {$node = new AtomNode(nodeList);}
   | ^(Range a=expr b=expr) {$node = new RangeNode($a.node, $b.node);}
   | ^(Filter Identifier a=expr b=expr) 
