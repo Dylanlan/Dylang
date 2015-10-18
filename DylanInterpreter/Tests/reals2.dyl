@@ -7,7 +7,6 @@ function main() returns integer {
 	print(a / b + "\n");
 	print(a * b + "\n");
 	print(-a - -b + "\n");
-	print(3.7 % 1.2 + "\n");
 	
 	
 	return 0;

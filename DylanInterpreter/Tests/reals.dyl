@@ -1,15 +1,15 @@
 function main() returns integer {
 	real a = .42;
 	real b = 42.0;
-	real c = 42e-10;
-	real d = 42e10;
-	real e = 42.e-10;
-	real f = 42.e+10;
-	real g = ._____42___;
-	real h = 4_2_._0_;
-	real i = 4_2_e_+_10_;
-	real j = 4.2__e__10;
-	real k = 4__.__2__e___-10___;
+	real c = 42e-5;
+	real d = 42e5;
+	real e = 42.e-5;
+	real f = 42.e+5;
+	real g = .42;
+	real h = 42.0;
+	real i = 42e+5;
+	real j = 4.2e5;
+	real k = 4.2e-5;
 	
 	print(a + "\n");
 	print(b + "\n");

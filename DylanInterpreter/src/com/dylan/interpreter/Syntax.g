@@ -382,8 +382,8 @@ fragment Digit
   : '0'..'9'
   ;
 fragment Exp
-  : ('e' | 'E') '_'* Digit+ '_'*
-  | ('e' | 'E') '_'* (Minus|Plus) '_'* Digit+ '_'*
+  : ('e' | 'E') Digit+
+  | ('e' | 'E') (Minus|Plus) Digit+
   ;
 
 Identifier
@@ -391,13 +391,13 @@ Identifier
   ;
 
 Number 
-  : Digit (Digit|'_')*
+  : Digit+
   ;
   
 FPNumber
-  : (Digit|'_')* 
+  : Digit* 
        (  Exp
-       | {input.LA(1) == '.' && input.LA(2) != '.'}? => Dot (Digit|'_')* Exp?  
+       | {input.LA(1) == '.' && input.LA(2) != '.'}? => Dot Digit* Exp?  
        | (Range)=>      {$type=Number;}  
        | 
        )
