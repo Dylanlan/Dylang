@@ -8,7 +8,7 @@ function main() returns integer {
 	
 	print(hello + "\n");
 	print(h3ll0 + "\n");
-	print(_h3ll0 + "\n");
+	print(_h3LL0 + "\n");
 	print(_Hi + "\n");
 	print(Hi + "\n");
 	print(He_y_ + "\n");
