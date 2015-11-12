@@ -20,7 +20,7 @@ function test5(boolean x) returns boolean {
 
 function test6(integer x) returns integer { return x ^ 2; }
 
-procedure main() returns integer {
+function main() returns integer {
 	print(test(5+900) + "\n");
 	print(test2(10 - 7) + "\n");
 	print(test3(3.14) + "\n");

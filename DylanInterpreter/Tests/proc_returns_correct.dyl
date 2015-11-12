@@ -23,7 +23,7 @@ function increment(var integer x) {
 	return;
 }
 
-procedure main() returns integer {
+function main() returns integer {
 	int a = test();
 	int b = test2(35);
 	bool c = test3(true);
