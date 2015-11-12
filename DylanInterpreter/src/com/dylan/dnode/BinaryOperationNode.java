@@ -113,21 +113,20 @@ public class BinaryOperationNode implements DNode {
 			return new DValue(a.toString() + "" + b.toString());  
 		}
 		
-		if (a.vectorType.equals("int") && b.vectorType.equals("int")) {
+		if (a.isVector() && b.isVector()) {
 			List<DValue> resultVector = new ArrayList<DValue>();
 			int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
 			for (int i = 0; i < maxSize; i++) {
-				int ai = 0;
+				DValue ai = new DValue();
 				if (i < a.vectorResult.size()) {
-					ai = a.vectorResult.get(i).intResult;
+					ai = a.vectorResult.get(i);
 				}
-				int bi = 0;
+				DValue bi = new DValue();
 				if (i < b.vectorResult.size()) {
-					bi = b.vectorResult.get(i).intResult;
+					bi = b.vectorResult.get(i);
 				}
-				resultVector.add(new DValue(new Integer(ai + bi)));
+				resultVector.add(this.add(ai, bi));
 			}
-			
 			DValue result = new DValue(resultVector, a.vectorType);
 			return result;
 		}
@@ -144,21 +143,20 @@ public class BinaryOperationNode implements DNode {
 			return new DValue(a.floatResult - b.floatResult);  
 		}
 		
-		if (a.vectorType.equals("int") && b.vectorType.equals("int")) {
+		if (a.isVector() && b.isVector()) {
 			List<DValue> resultVector = new ArrayList<DValue>();
 			int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
 			for (int i = 0; i < maxSize; i++) {
-				int ai = 0;
+				DValue ai = new DValue();
 				if (i < a.vectorResult.size()) {
-					ai = a.vectorResult.get(i).intResult;
+					ai = a.vectorResult.get(i);
 				}
-				int bi = 0;
+				DValue bi = new DValue();
 				if (i < b.vectorResult.size()) {
-					bi = b.vectorResult.get(i).intResult;
+					bi = b.vectorResult.get(i);
 				}
-				resultVector.add(new DValue(new Integer(ai - bi)));
+				resultVector.add(this.sub(ai, bi));
 			}
-			
 			DValue result = new DValue(resultVector, a.vectorType);
 			return result;
 		}
@@ -175,21 +173,20 @@ public class BinaryOperationNode implements DNode {
 			return new DValue(a.floatResult * b.floatResult);  
 		}
 		
-		if (a.vectorType.equals("int") && b.vectorType.equals("int")) {
+		if (a.isVector() && b.isVector()) {
 			List<DValue> resultVector = new ArrayList<DValue>();
 			int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
 			for (int i = 0; i < maxSize; i++) {
-				int ai = 1;
+				DValue ai = new DValue();
 				if (i < a.vectorResult.size()) {
-					ai = a.vectorResult.get(i).intResult;
+					ai = a.vectorResult.get(i);
 				}
-				int bi = 1;
+				DValue bi = new DValue();
 				if (i < b.vectorResult.size()) {
-					bi = b.vectorResult.get(i).intResult;
+					bi = b.vectorResult.get(i);
 				}
-				resultVector.add(new DValue(new Integer(ai * bi)));
+				resultVector.add(this.mul(ai, bi));
 			}
-			
 			DValue result = new DValue(resultVector, a.vectorType);
 			return result;
 		}
@@ -210,6 +207,24 @@ public class BinaryOperationNode implements DNode {
 				System.out.println("Error: divide by 0");
 			}
 			return new DValue(a.floatResult / b.floatResult);  
+		}
+		
+		if (a.isVector() && b.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
+			for (int i = 0; i < maxSize; i++) {
+				DValue ai = new DValue();
+				if (i < a.vectorResult.size()) {
+					ai = a.vectorResult.get(i);
+				}
+				DValue bi = new DValue();
+				if (i < b.vectorResult.size()) {
+					bi = b.vectorResult.get(i);
+				}
+				resultVector.add(this.div(ai, bi));
+			}
+			DValue result = new DValue(resultVector, a.vectorType);
+			return result;
 		}
 		
 		throw new RuntimeException("illegal expression: " + this);

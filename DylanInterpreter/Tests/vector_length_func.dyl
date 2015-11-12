@@ -1,8 +1,8 @@
 function main() returns integer {
-	integer vector x[3] = [1, 2, 3];
+	integer vector x = [1, 2, 3];
 	integer vector y = [1, 2, 3, 4, 5];
-	integer z[4] = [1, 2, 3, 4];
-	integer a[*] = [1, 2];
+	integer z = [1, 2, 3, 4];
+	integer a = [1, 2];
 	print(length(x) + "\n");
 	print(length(y) + "\n");
 	print(length(z) + "\n");
