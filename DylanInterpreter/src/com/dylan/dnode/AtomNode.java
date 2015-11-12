@@ -8,6 +8,8 @@ import com.dylan.symbolTable.Scope;
 public class AtomNode implements DNode {
 	private DValue value = null; 
 	private DNode node = null;
+	private DNode vector = null;
+	private DNode index = null;
 	private List<DNode> nodes = null;
 	  
 	public AtomNode(DValue value) {
@@ -16,6 +18,11 @@ public class AtomNode implements DNode {
 	
 	public AtomNode(DNode node) {
 		this.node = node;
+	}
+	
+	public AtomNode(DNode vector, DNode index) {
+		this.vector = vector;
+		this.index = index;
 	}
 	
 	public AtomNode(List<DNode> nodes) {
@@ -41,6 +48,28 @@ public class AtomNode implements DNode {
 			}
 			result.vectorType = type;
 			return result;
+		}
+		else if (this.vector != null && this.index != null) {
+			DValue vectorResult = this.vector.evaluate(currentScope);
+			DValue indexResult = this.index.evaluate(currentScope);
+			if (!vectorResult.isVector()) {
+				throw new RuntimeException("trying to index a non-vector: " + vectorResult);
+			}
+			
+			if (!indexResult.isInt()) {
+				throw new RuntimeException("index must be an integer: " + indexResult);
+			}
+			
+			int index = indexResult.intResult;
+			List<DValue> vector = vectorResult.vectorResult;
+			if (index < 0) {
+				throw new RuntimeException("index must be non-negative: " + indexResult);
+			}
+			else if (index >= vector.size()) {
+				throw new RuntimeException("index out of bounds vector size: " + vector.size() + ", index: " + indexResult);
+			}
+			
+			return vectorResult.vectorResult.get(indexResult.intResult);
 		}
 		else {
 			return new DValue();

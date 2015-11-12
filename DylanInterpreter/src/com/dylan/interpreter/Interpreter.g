@@ -235,7 +235,7 @@ expr returns [DNode node]
   | ^(Range a=expr b=expr) {$node = new RangeNode($a.node, $b.node);}
   | ^(Filter Identifier a=expr b=expr) 
   | ^(GENERATOR type id=Identifier a=expr b=expr) {$node = new GeneratorNode($id.text, $a.node, $b.node);}
-  | ^(INDEX vector=expr index=expr)
+  | ^(INDEX vector=expr index=expr) {$node = new AtomNode($vector.node, $index.node);}
   | ^(PREINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_PRE_INCR);}
   | ^(PREDECREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_PRE_DECR);}
   | ^(POSTINCREMENT id=Identifier) {$node = new UnaryOperationNode($id.text, UnaryOperationNode.UON_POST_INCR);}
