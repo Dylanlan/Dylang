@@ -9,10 +9,10 @@ function main() returns integer {
 	
 	c = not b;
 	print(c + "\n");
-	print(a != b + "\n");
-	print(b != b + "\n");
-	print(a == b + "\n");
-	print(b == b + "\n");
+	print((a != b) + "\n");
+	print((b != b) + "\n");
+	print((a == b) + "\n");
+	print((b == b) + "\n");
 	
 	return 0;
 }

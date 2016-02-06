@@ -85,9 +85,13 @@ reverse
 	;
 
 declaration
-	: specifier? type? Identifier Assign expr -> ^(DECL specifier? type? ^(Assign Identifier expr)) 
-	| specifier? type? Identifier -> ^(DECL specifier? type? Identifier)
+	: specifier? type? Identifier size? Assign expr -> ^(DECL specifier? type? size? ^(Assign Identifier expr)) 
+	| specifier? type? Identifier size? -> ^(DECL specifier? type? size? Identifier)
 	;
+  
+ size
+ 	: vectorconst -> ^(SIZE vectorconst)
+ 	;
   
 typedef
   : Typedef type Identifier SemiColon -> ^(Typedef type Identifier)
@@ -266,10 +270,10 @@ atom
         {
           toVConst.addChild((CommonTree) adaptor.create(Char, tokens[i] + tokens[i+1]));
           i++;
-          } 
-          else 
+        } 
+        else 
           toVConst.addChild((CommonTree) adaptor.create(Char, '\'' + tokens[i] + '\''));
-       }
+     }
     }
   }
   -> ^(VCONST {toVConst})

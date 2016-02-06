@@ -87,8 +87,15 @@ declaration returns [DNode node]
 	VariableSymbol vs = null;
 	DValue result = null;
 }
-	: ^(DECL s=specifier? t=type id=Identifier) {$node = new DeclarationNode($id.text, $t.type);}
-	| ^(DECL s=specifier? t=type? ^(Assign id=Identifier value=expr)) {$node = new DeclarationNode($id.text, $value.node);}
+	: ^(DECL s=specifier? t=type z=size? id=Identifier) {$node = new DeclarationNode($id.text, $t.type);}
+	| ^(DECL s=specifier? t=type? z=size? ^(Assign id=Identifier value=expr)) {$node = new DeclarationNode($id.text, $value.node);}
+	;
+
+size returns [DNode node]
+@init {
+	List<DNode> nodeList = new ArrayList<DNode>();
+}
+	: ^(SIZE (a=expr {nodeList.add($a.node);})+ {$node = new AtomNode(nodeList);})
 	;
 
 block returns [DNode node]

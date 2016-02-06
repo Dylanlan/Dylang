@@ -40,7 +40,7 @@ public class BinaryOperationNode implements DNode {
 		DValue result = null;
 		DValue a = lhs.evaluate(currentScope);  
 		DValue b = rhs.evaluate(currentScope);
- 
+		
 		switch(this.operation) {
 		case BON_ADD:
 			result = this.add(a, b);
@@ -109,7 +109,7 @@ public class BinaryOperationNode implements DNode {
 			return new DValue(a.charResult.toString() + b.charResult.toString());
 		}
 		 
-		if(a.isString() || b.isString()) {  
+		if(a.isString() || b.isString()) {
 			return new DValue(a.toString() + "" + b.toString());  
 		}
 		
@@ -197,14 +197,14 @@ public class BinaryOperationNode implements DNode {
 	private DValue div(DValue a, DValue b) {
 		if(a.intResult != null && b.intResult != null) {
 			if (b.intResult == 0) {
-				System.out.println("Error: divide by 0");
+				throw new RuntimeException("Error: divide by 0");
 			}
 			return new DValue(a.intResult / b.intResult);  
 		}
 		
 		if(a.floatResult != null && b.floatResult != null) {
 			if (b.floatResult == 0) {
-				System.out.println("Error: divide by 0");
+				throw new RuntimeException("Error: divide by 0");
 			}
 			return new DValue(a.floatResult / b.floatResult);  
 		}
@@ -233,14 +233,14 @@ public class BinaryOperationNode implements DNode {
 	private DValue mod(DValue a, DValue b) {
 		if(a.intResult != null && b.intResult != null) {
 			if (b.intResult == 0) {
-				System.out.println("Error: mod by 0");
+				throw new RuntimeException("Error: mod by 0");
 			}
 			return new DValue(a.intResult % b.intResult);  
 		}
 		
 		if(a.floatResult != null && b.floatResult != null) {
 			if (b.floatResult == 0) {
-				System.out.println("Error: mod by 0");
+				throw new RuntimeException("Error: mod by 0");
 			}
 			return new DValue(a.floatResult % b.floatResult);  
 		}
@@ -283,16 +283,34 @@ public class BinaryOperationNode implements DNode {
 		if (a.boolResult != null && b.boolResult != null) {
 			return new DValue(a.boolResult && b.boolResult);
 		}
+		
+		if (a.isVector() && b.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
+			for (int i = 0; i < maxSize; i++) {
+				DValue ai = new DValue();
+				if (i < a.vectorResult.size()) {
+					ai = a.vectorResult.get(i);
+				}
+				DValue bi = new DValue();
+				if (i < b.vectorResult.size()) {
+					bi = b.vectorResult.get(i);
+				}
+				resultVector.add(this.and(ai, bi));
+			}
+			DValue result = new DValue(resultVector, a.vectorType);
+			return result;
+		}
 
 		throw new RuntimeException("illegal expression: " + this);
 	}
 	
 	private DValue equal(DValue a, DValue b) {
-		if(a.intResult != null && b.intResult != null) {  
+		if(a.intResult != null && b.intResult != null) {
 			return new DValue(a.intResult.intValue() == b.intResult.intValue());  
 		}
 		
-		if(a.floatResult != null && b.floatResult != null) {  
+		if(a.floatResult != null && b.floatResult != null) {
 			return new DValue(a.floatResult.floatValue() == b.floatResult.floatValue());  
 		}
 		
@@ -304,8 +322,47 @@ public class BinaryOperationNode implements DNode {
 			return new DValue(a.boolResult.booleanValue() == b.boolResult.booleanValue());
 		}
 		 
-		if(a.isString() || b.isString()) {  
+		if (a.isString() || b.isString()) {
 			return new DValue(a.toString().equals(b.toString()));  
+		}
+		
+		if (a.isVector() && b.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			
+			if (a.vectorResult.size() != b.vectorResult.size())
+			{
+				return new DValue(false);
+			}
+			
+			int size = a.vectorResult.size();
+			boolean equal = true;
+			for (int i = 0; i < size; i++) {
+				DValue ai = a.vectorResult.get(i);
+				DValue bi = b.vectorResult.get(i);
+
+				DValue indexEqual = this.equal(ai, bi);
+				
+				if (indexEqual.boolResult != null)
+				{
+					if (!indexEqual.boolResult)
+					{
+						equal = false;
+					}
+				}
+				else
+				{
+					throw new RuntimeException("Equals() didn't return a bool!");
+				}
+			}
+			
+			if (equal)
+			{
+				return new DValue(true);
+			}
+			else
+			{
+				return new DValue(false);
+			}
 		}
 		
 		throw new RuntimeException("illegal expression: " + this);
@@ -326,6 +383,45 @@ public class BinaryOperationNode implements DNode {
 		 
 		if(a.isString() || b.isString()) {  
 			return new DValue(!a.toString().equals(b.toString()));  
+		}
+		
+		if (a.isVector() && b.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			
+			if (a.vectorResult.size() != b.vectorResult.size())
+			{
+				return new DValue(true);
+			}
+			
+			int size = a.vectorResult.size();
+			boolean equal = true;
+			for (int i = 0; i < size; i++) {
+				DValue ai = a.vectorResult.get(i);
+				DValue bi = b.vectorResult.get(i);
+
+				DValue indexEqual = this.equal(ai, bi);
+				
+				if (indexEqual.boolResult != null)
+				{
+					if (!indexEqual.boolResult)
+					{
+						equal = false;
+					}
+				}
+				else
+				{
+					throw new RuntimeException("Equals() didn't return a bool!");
+				}
+			}
+			
+			if (equal)
+			{
+				return new DValue(false);
+			}
+			else
+			{
+				return new DValue(true);
+			}
 		}
 		
 		throw new RuntimeException("illegal expression: " + this);
@@ -383,6 +479,24 @@ public class BinaryOperationNode implements DNode {
 		if (a.boolResult != null && b.boolResult != null) {
 			return new DValue(a.boolResult || b.boolResult);
 		}
+		
+		if (a.isVector() && b.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
+			for (int i = 0; i < maxSize; i++) {
+				DValue ai = new DValue();
+				if (i < a.vectorResult.size()) {
+					ai = a.vectorResult.get(i);
+				}
+				DValue bi = new DValue();
+				if (i < b.vectorResult.size()) {
+					bi = b.vectorResult.get(i);
+				}
+				resultVector.add(this.or(ai, bi));
+			}
+			DValue result = new DValue(resultVector, a.vectorType);
+			return result;
+		}
 
 		throw new RuntimeException("illegal expression: " + this);
 	}
@@ -390,6 +504,24 @@ public class BinaryOperationNode implements DNode {
 	private DValue xor(DValue a, DValue b) {
 		if (a.boolResult != null && b.boolResult != null) {
 			return new DValue(a.boolResult ^ b.boolResult);
+		}
+		
+		if (a.isVector() && b.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			int maxSize = Math.max(a.vectorResult.size(), b.vectorResult.size());
+			for (int i = 0; i < maxSize; i++) {
+				DValue ai = new DValue();
+				if (i < a.vectorResult.size()) {
+					ai = a.vectorResult.get(i);
+				}
+				DValue bi = new DValue();
+				if (i < b.vectorResult.size()) {
+					bi = b.vectorResult.get(i);
+				}
+				resultVector.add(this.xor(ai, bi));
+			}
+			DValue result = new DValue(resultVector, a.vectorType);
+			return result;
 		}
 
 		throw new RuntimeException("illegal expression: " + this);

@@ -1,5 +1,8 @@
 package com.dylan.dnode;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.dylan.symbolTable.Scope;
 
 public class UnaryOperationNode implements DNode{
@@ -76,6 +79,17 @@ public class UnaryOperationNode implements DNode{
 		if (a.boolResult != null) {
 			return new DValue(!a.boolResult);
 		}
+		
+		if (a.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			int size = a.vectorResult.size();
+			for (int i = 0; i < size; i++) {
+				DValue ai = a.vectorResult.get(i);
+				resultVector.add(this.not(ai));
+			}
+			DValue result = new DValue(resultVector, a.vectorType);
+			return result;
+		} 
 
 		throw new RuntimeException("illegal expression: " + this);
 	}
