@@ -125,10 +125,20 @@ public class BinaryOperationNode implements DNode {
 				if (i < b.vectorResult.size()) {
 					bi = b.vectorResult.get(i);
 				}
+				
 				resultVector.add(this.add(ai, bi));
 			}
 			DValue result = new DValue(resultVector, a.vectorType);
 			return result;
+		}
+		
+		if (a.isNull())
+		{
+			return b;
+		}
+		else if (b.isNull())
+		{
+			return a;
 		}
 
 		throw new RuntimeException("illegal expression: " + this);
@@ -160,6 +170,21 @@ public class BinaryOperationNode implements DNode {
 			DValue result = new DValue(resultVector, a.vectorType);
 			return result;
 		}
+		
+		if (a.isNull())
+		{
+			//TODO: use UnaryOperationNode?
+			if (b.intResult != null) {
+				return new DValue(-b.intResult);
+			}
+			else if (b.floatResult != null) {
+				return new DValue(-b.floatResult);
+			}
+		}
+		else if (b.isNull())
+		{
+			return a;
+		}
 
 		throw new RuntimeException("illegal expression: " + this);
 	}
@@ -189,6 +214,27 @@ public class BinaryOperationNode implements DNode {
 			}
 			DValue result = new DValue(resultVector, a.vectorType);
 			return result;
+		}
+		
+		if (a.isNull())
+		{
+			if (b.isInt()){
+				return new DValue(0);
+			}
+			else if (b.isFloat())
+			{
+				return new DValue(0F);
+			}
+		}
+		else if (b.isNull())
+		{
+			if (a.isInt()){
+				return new DValue(0);
+			}
+			else if (a.isFloat())
+			{
+				return new DValue(0F);
+			}
 		}
 
 		throw new RuntimeException("illegal expression: " + this); 
@@ -225,6 +271,21 @@ public class BinaryOperationNode implements DNode {
 			}
 			DValue result = new DValue(resultVector, a.vectorType);
 			return result;
+		}
+		
+		if (a.isNull() && !b.isNull())
+		{
+			if (b.isInt()){
+				return new DValue(0);
+			}
+			else if (b.isFloat())
+			{
+				return new DValue(0F);
+			}
+		}
+		else if (b.isNull())
+		{
+			throw new RuntimeException("Can't divide by a null value: " + this);
 		}
 		
 		throw new RuntimeException("illegal expression: " + this);

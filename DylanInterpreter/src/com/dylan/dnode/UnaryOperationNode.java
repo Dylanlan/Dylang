@@ -71,6 +71,17 @@ public class UnaryOperationNode implements DNode{
 		else if (a.floatResult != null) {
 			return new DValue(-a.floatResult);
 		}
+		
+		if (a.isVector()) {
+			List<DValue> resultVector = new ArrayList<DValue>();
+			int size = a.vectorResult.size();
+			for (int i = 0; i < size; i++) {
+				DValue ai = a.vectorResult.get(i);
+				resultVector.add(this.neg(ai));
+			}
+			DValue result = new DValue(resultVector, a.vectorType);
+			return result;
+		}
 
 		throw new RuntimeException("illegal expression: " + this);  
 	}

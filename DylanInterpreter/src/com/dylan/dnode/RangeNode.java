@@ -25,12 +25,12 @@ public class RangeNode implements DNode {
 		
 		vecType = lowerVal.getType();
 		
-		if (lowerVal.isInt()) {
+		if (lowerVal.isInt() && upperVal.isInt()) {
 			for (int i = lowerVal.getInt(); i <= upperVal.getInt(); i++) {
 				vecResult.add(new DValue(i));
 			}
 		}
-		else if (lowerVal.isChar()) {
+		else if (lowerVal.isChar() && upperVal.isChar()) {
 			for (char i = lowerVal.getChar(); i <= upperVal.getChar(); i++) {
 				vecResult.add(new DValue(i));
 			}
