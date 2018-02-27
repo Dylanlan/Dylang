@@ -12,8 +12,8 @@ import java.util.List;
 
 public class Tester {
 	public static final String interpreter = "java -cp antlr-3.3-complete.jar;bin/ com.dylan.interpreter.Main";
-	public static final boolean debug = true;
-	public static String singleTestName = "empty_string";
+	public static final boolean debug = false;
+	public static String singleTestName = "";
 	
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
@@ -141,6 +141,8 @@ public class Tester {
 			p.destroy();
 			return 0;
 		}
+		
+		
 		
 		BufferedReader correct_output = null;
 		
