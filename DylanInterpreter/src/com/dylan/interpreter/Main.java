@@ -23,7 +23,7 @@ import com.dylan.symbolTable.SymbolTable;
 public class Main {
 	public static void main(String[] args) throws RecognitionException {
 		if (args.length != 1) {
-			System.err.print("Usage: Tester <dash_file>");
+			System.err.print("Usage: Tester <file>");
 			System.exit(1);
 		}
 		String inputfile = null;

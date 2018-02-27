@@ -1,17 +1,19 @@
 package com.dylan.tester;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Tester {
 	public static final String interpreter = "java -cp antlr-3.3-complete.jar;bin/ com.dylan.interpreter.Main";
-	public static final boolean debug = false;
-	public static String singleTestName = "";
+	public static final boolean debug = true;
+	public static String singleTestName = "empty_string";
 	
 	public static void main(String[] args) {
 		long time = System.currentTimeMillis();
@@ -99,6 +101,11 @@ public class Tester {
 		}
 
 		String fileName = "Tests/" + testName.replace(".dyl", "") + ".exp";
+		
+		boolean expected_error = false;
+		if (fileName.endsWith("_err.exp")) {
+			expected_error = true;
+		}
 
 		File output_file = new File(fileName);
 		if (!output_file.isFile()) {
@@ -111,6 +118,30 @@ public class Tester {
 		String output_line = null;
 		String correct_line = null;
 		BufferedReader interp_output = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		BufferedReader interp_error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+		
+		boolean encountered_error = false;
+		try {
+			if (interp_error.readLine() != null) {
+				encountered_error = true;
+			}
+		}
+		catch (IOException e) {
+			System.out.println("IO Exception checking error: " + e.getMessage());
+		}
+		
+		if (expected_error != encountered_error) {
+			if (debug && expected_error) System.out.println("Expected an error but didn't encounter one");
+			if (debug && encountered_error) System.out.println("Encountered an error but didn't expect one");
+			
+			p.destroy();
+			return -1;
+		}
+		else if (expected_error && encountered_error) {
+			p.destroy();
+			return 0;
+		}
+		
 		BufferedReader correct_output = null;
 		
 		try {
@@ -146,6 +177,9 @@ public class Tester {
 		}
 		catch (IOException e) {
 			System.out.println("IO Exception comparing output: " + e.getMessage());
+		}
+		catch (Exception ex) {
+			System.out.println("Exception running test: " + ex.getMessage());
 		}
 
 		try {
